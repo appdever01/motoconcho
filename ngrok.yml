@@ -1,0 +1,7 @@
+tunnels:
+  example-tunnel:
+    addr: 4002
+    proto: http
+    bind_tls: true
+    headers:
+      ngrok-skip-browser-warning: "true"
