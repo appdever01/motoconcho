@@ -95,9 +95,11 @@ let usr = User({});
 let tem = true;
 app.post("/webhook", async (req, res) => {
   const data = req.body;
-  const isAdmin = adminNumber.some(
-    (phoneNumber) => data.to === phoneNumber.trim()
-  );
+  const isAdmin = adminNumber.some((phoneNumber) => {
+    console.log(phoneNumber);
+    console.log(data.to);
+    data.to === phoneNumber.trim();
+  });
 
   try {
     const user = await User.findOne({ phone: data.to });
@@ -577,13 +579,13 @@ app.post("/webhook", async (req, res) => {
             });
           break;
         case "cancel_trip":
+          needed.location = false;
+          needed.destination = false;
           send_button(
             "Your trip has been successfully cancelled ✅〽️",
             [{ id: "create_trip", title: "Start a trip 🚕" }],
             data
           );
-          needed.location = false;
-          needed.destination = false;
 
           break;
         case "admin_menu":
