@@ -520,6 +520,7 @@ app.post("/webhook", async (req, res) => {
           send_message("Your language has been set to Spanish 🇪🇸", data);
           await delay(3000);
           send_message("Could you kindly tell me your name? 😊👤", data);
+          needed.name = true;
           break;
         case "change_location":
           needed.location = true;
