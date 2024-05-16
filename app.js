@@ -616,14 +616,20 @@ app.post("/webhook", async (req, res) => {
           send_message("*Please wait while fetching all drivers* ⏳👨‍✈️", data);
           Driver.find({})
             .then(async (drivers) => {
-              // Added async here
-              for (const driver of drivers) {
-                send_driver_template(
-                  needed.language == "english" ? "en_US" : "es",
-                  data,
-                  driver
+              if (drivers.length === 0) {
+                send_message(
+                  "No drivers found at the moment. Please try again later.",
+                  data
                 );
-                await delay(3000);
+              } else {
+                for (const driver of drivers) {
+                  send_driver_template(
+                    needed.language == "english" ? "en_US" : "es",
+                    data,
+                    driver
+                  );
+                  await delay(3000);
+                }
               }
             })
             .catch((err) => {

@@ -122,18 +122,18 @@ function validateLanguage(data) {
 }
 
 function validateLocation(data) {
-  const osunBoundaries = {
-    minLat: 7.4629,
-    maxLat: 8.6629,
-    minLong: 4.42,
-    maxLong: 4.62,
+  const sousaDominicanBoundaries = {
+    minLat: 19.7519 - 0.1, // Adjusted latitude boundary by 0.1 degrees
+    maxLat: 19.7519 + 0.1,
+    minLong: -70.5189 - 0.1, // Adjusted longitude boundary by 0.1 degrees
+    maxLong: -70.5189 + 0.1,
   };
 
   if (
-    data.lat >= osunBoundaries.minLat &&
-    data.lat <= osunBoundaries.maxLat &&
-    data.long >= osunBoundaries.minLong &&
-    data.long <= osunBoundaries.maxLong
+    data.lat >= sousaDominicanBoundaries.minLat &&
+    data.lat <= sousaDominicanBoundaries.maxLat &&
+    data.long >= sousaDominicanBoundaries.minLong &&
+    data.long <= sousaDominicanBoundaries.maxLong
   ) {
     return true;
   } else if (data.type !== "location") {
