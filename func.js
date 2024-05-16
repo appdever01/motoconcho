@@ -5,7 +5,7 @@ let needed = {
   email: false,
   location: false,
   destination: false,
-  welcome: false,
+  welcome: true,
   isUser: false,
   language: "english",
   driver: {

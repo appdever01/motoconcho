@@ -51,8 +51,18 @@ const getDriverCount = async () => {
     return null;
   }
 };
+const getUserCount = async () => {
+  try {
+    const count = await User.countDocuments({});
+    console.log("Number of documents in 'users' collection:", count);
+    return count;
+  } catch (error) {
+    console.error("Error counting documents:", error);
+    return null;
+  }
+};
 
-const newUser = new User({
+let newUser = new User({
   fullname: "",
   email: "user@example.com",
   language: "english",
@@ -91,28 +101,45 @@ app.post("/webhook", async (req, res) => {
 
   try {
     const user = await User.findOne({ phone: data.to });
-    if (user) {
+    const bannedUser = await User.findOne({ phone: data.to, banned: true });
+    if (user && bannedUser == null) {
+      console.log("going");
       needed.language = user.language;
       // console.log("User found:", user);
       usr = user;
-      needed.language = usr.language;
-      if (tem && !data.msg.startsWith("/")) {
-        send_button(
-          !isAdmin
-            ? ` Welcome back *${user.fullname}*! 🚀🌍 \n\nWe're thrilled to have you on board. You can now start creating your trip and look for drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
-            : "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
+      newUser = user;
 
-          [
-            { id: "create_trip", title: "Start a trip 🚕" },
-            isAdmin ? { id: "admin_menu", title: "Admin menu 📋" } : null,
-          ],
-          data
-        );
+      needed.language = usr.language;
+
+      if (tem && !data.msg.startsWith("/")) {
+        console.log("entered");
+        if (isAdmin) {
+          send_button(
+            "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
+            [
+              { id: "create_trip", title: "Start a trip 🚕" },
+              { id: "admin_menu", title: "Admin menu 📋" },
+            ],
+
+            data
+          );
+        } else {
+          send_button(
+            `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`,
+            [{ id: "create_trip", title: "Start a trip 🚕" }],
+
+            data
+          );
+        }
         tem = false;
       }
+    } else if (bannedUser !== null) {
+      send_message(
+        "🚫 Sorry, your account has been banned. If you believe this is a mistake, please contact support. 🙏",
+        data
+      );
     } else {
       newUser.phone = data.to;
-      needed.welcome = true;
       if (needed.welcome && !data.msg.startsWith("/")) {
         send_button(
           getLanguageMessage("welcome_message", needed.language),
@@ -158,7 +185,7 @@ app.post("/webhook", async (req, res) => {
           send_template(
             "send_image",
             "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",
-            needed.language == "englis" ? "en_US" : "es",
+            needed.language == "english" ? "en_US" : "es",
             data
           );
         } else {
@@ -177,17 +204,27 @@ app.post("/webhook", async (req, res) => {
             [{ id: "change_location", title: "Change location 🌍" }],
             data
           );
-          send_button(
-            !isAdmin
-              ? `🎉🎊 Hello *${newUser.fullname}*, Welcome to MOTOCONCHO! 🚀🌍 \n\nWe're thrilled to have you on board. You've been successfully registered with the email ${newUser.email}. 📧👍 You can now start creating your first trip and look for drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
-              : "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
-            [
-              { id: "create_trip", title: "Start a trip 🚕" },
-              isAdmin ? { id: "admin_menu", title: "Admin menu 📋" } : null,
-            ],
+          await delay(3000);
 
-            data
-          );
+          if (isAdmin) {
+            send_button(
+              "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
+              [
+                { id: "create_trip", title: "Start a trip 🚕" },
+                { id: "admin_menu", title: "Admin menu 📋" },
+              ],
+
+              data
+            );
+          } else {
+            send_button(
+              `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`,
+              [{ id: "create_trip", title: "Start a trip 🚕" }],
+
+              data
+            );
+          }
+          tem = false;
 
           newUser
             .save()
@@ -261,8 +298,9 @@ app.post("/webhook", async (req, res) => {
       );
       needed.destination = false;
     } else if (
+      needed.destination &&
       JSON.stringify(newTrip.location) ==
-      JSON.stringify([data.lat.toString(), data.long.toString()])
+        JSON.stringify([data.lat.toString(), data.long.toString()])
     ) {
       send_message(
         "⚠️ Warning: Destination cannot be the same as the location ⚠️",
@@ -433,21 +471,29 @@ app.post("/webhook", async (req, res) => {
       send_template(
         "learn_more",
         "https://i.ibb.co/TL6pV5v/315-C110-D-6255-4-A54-96-C7-761-F6-AF16-D5-A-1.png",
-        needed.language == "englis" ? "en_US" : "es",
+        needed.language == "english" ? "en_US" : "es",
         data
       );
     } else if (data.msg == "/menu") {
-      send_button(
-        !isAdmin
-          ? ` Welcome back *${user.fullname}*! 🚀🌍 \n\nWe're thrilled to have you on board. You can now start creating your trip and look for drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
-          : "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
+      if (isAdmin) {
+        send_button(
+          "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
+          [
+            { id: "create_trip", title: "Start a trip 🚕" },
+            { id: "admin_menu", title: "Admin menu 📋" },
+          ],
 
-        [
-          { id: "create_trip", title: "Start a trip 🚕" },
-          isAdmin ? { id: "admin_menu", title: "Admin menu 📋" } : null,
-        ],
-        data
-      );
+          data
+        );
+      } else {
+        send_button(
+          `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`,
+          [{ id: "create_trip", title: "Start a trip 🚕" }],
+
+          data
+        );
+      }
+      tem = false;
     }
     if (data.type === "interactive") {
       switch (data.btn_id) {
@@ -455,7 +501,7 @@ app.post("/webhook", async (req, res) => {
           send_template(
             "learn_more",
             "https://i.ibb.co/TL6pV5v/315-C110-D-6255-4-A54-96-C7-761-F6-AF16-D5-A-1.png",
-            needed.language == "englis" ? "en_US" : "es",
+            needed.language == "english" ? "en_US" : "es",
             data
           );
           break;
@@ -463,7 +509,7 @@ app.post("/webhook", async (req, res) => {
           newUser.language = "english";
           needed.language = "english";
           send_message("Your language has been set to English 🇬🇧", data);
-          delay(2000);
+          await delay(3000);
           send_message("Could you kindly tell me your name? 😊👤", data);
           needed.name = true;
 
@@ -471,8 +517,9 @@ app.post("/webhook", async (req, res) => {
         case "btn_spa":
           newUser.language = "spanish";
           needed.language = "spanish";
-          await send_message("Your language has been set to Spanish 🇪🇸", data);
-
+          send_message("Your language has been set to Spanish 🇪🇸", data);
+          await delay(3000);
+          send_message("Could you kindly tell me your name? 😊👤", data);
           break;
         case "change_location":
           needed.location = true;
@@ -480,7 +527,7 @@ app.post("/webhook", async (req, res) => {
           send_template(
             "send_image",
             "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",
-            needed.language == "englis" ? "en_US" : "es",
+            needed.language == "english" ? "en_US" : "es",
             data
           );
 
@@ -491,7 +538,7 @@ app.post("/webhook", async (req, res) => {
           send_template(
             "get_dest",
             "https://i.ibb.co/ng2664M/IMG-20240506-210439.jpg",
-            needed.language == "englis" ? "en_US" : "es",
+            needed.language == "english" ? "en_US" : "es",
             data
           );
 
@@ -501,7 +548,7 @@ app.post("/webhook", async (req, res) => {
           send_template(
             "get_dest",
             "https://i.ibb.co/ng2664M/IMG-20240506-210439.jpg",
-            needed.language == "englis" ? "en_US" : "es",
+            needed.language == "english" ? "en_US" : "es",
             data
           );
           needed.destination = true;
@@ -517,7 +564,7 @@ app.post("/webhook", async (req, res) => {
               // Added async here
               for (const driver of drivers) {
                 send_driver_alert(
-                  needed.language == "englis" ? "en_US" : "es",
+                  needed.language == "english" ? "en_US" : "es",
                   data,
                   driver
                 );
@@ -572,7 +619,7 @@ app.post("/webhook", async (req, res) => {
               // Added async here
               for (const driver of drivers) {
                 send_driver_template(
-                  needed.language == "englis" ? "en_US" : "es",
+                  needed.language == "english" ? "en_US" : "es",
                   data,
                   driver
                 );
@@ -584,17 +631,31 @@ app.post("/webhook", async (req, res) => {
             });
           break;
         case "manage_users":
+          const userCount = await getUserCount();
+          send_message(
+            `👨‍✈️ Hello there! Welcome to the *MOTOCONCHO* User Management 📋! \n\nCurrently, we have *${userCount}* registered users. 🚗`,
+            data
+          );
+          await delay(3000);
           send_message("*Please wait while fetching all users* ⏳👨", data);
           await delay(3000);
           User.find({})
             .then(async (users) => {
               // Added async here
               for (const user of users) {
-                send_button(
-                  `👤 *Name:* ${user.fullname}\n📧 *Email:* ${user.email}\n☎️ *Phone:* ${user.phone}`,
-                  [{ id: `${user.phone}`, title: "Ban User ❎" }],
-                  data
-                );
+                if (user.banned) {
+                  send_button(
+                    `👤 *Name:* ${user.fullname}\n📧 *Email:* ${user.email}\n☎️ *Phone:* ${user.phone}`,
+                    [{ id: `unban_${user.phone}`, title: "Unban User 🔰" }],
+                    data
+                  );
+                } else {
+                  send_button(
+                    `👤 *Name:* ${user.fullname}\n📧 *Email:* ${user.email}\n☎️ *Phone:* ${user.phone}`,
+                    [{ id: `ban_${user.phone}`, title: "Ban User ❎" }],
+                    data
+                  );
+                }
                 await delay(3000);
               }
             })
@@ -632,6 +693,40 @@ app.post("/webhook", async (req, res) => {
           .catch((error) => {
             console.error("Error saving user:", error);
           });
+      } else if (data.btn_id.startsWith("ban_")) {
+        const phn = data.btn_id.replace("ban_", "");
+        console.log(`Banning ${phn}`);
+        try {
+          const updatedDocument = await User.findOneAndUpdate(
+            { phone: phn },
+            { $set: { banned: true } },
+            { new: true, upsert: true }
+          );
+          console.log("Updated document:", updatedDocument);
+          send_message(
+            ` *${updatedDocument.fullname}* has been successfully banned from the platform. 🛑`,
+            data
+          );
+        } catch (error) {
+          console.error("Error updating user:", error);
+        }
+      } else if (data.btn_id.startsWith("unban_")) {
+        const phn = data.btn_id.replace("unban_", "");
+        console.log(`Unbanning ${phn}`);
+        try {
+          const updatedDocument = await User.findOneAndUpdate(
+            { phone: phn },
+            { $set: { banned: false } },
+            { new: true, upsert: true }
+          );
+          console.log("Updated document:", updatedDocument);
+          send_message(
+            ` *${updatedDocument.fullname}* has been successfully unbanned from the platform. ✅☺️`,
+            data
+          );
+        } catch (error) {
+          console.error("Error updating user:", error);
+        }
       }
     }
 
@@ -657,7 +752,7 @@ app.post("/webhook", async (req, res) => {
 
         case "Alert Driver":
           trip_alert(
-            needed.language == "englis" ? "en_US" : "es",
+            needed.language == "english" ? "en_US" : "es",
             data.btn_payload,
             usr,
             newTrip
