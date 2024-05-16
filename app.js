@@ -30,8 +30,7 @@ const {
   needed,
 } = require("./func");
 
-const admin = process.env.ADMIN || "2347049972537";
-const adminNumber = admin.split(",");
+const adminNumber = ["2347049972537", "18096657332"];
 
 app.use(express.json());
 
@@ -95,10 +94,7 @@ let usr = User({});
 let tem = true;
 app.post("/webhook", async (req, res) => {
   const data = req.body;
-  const isAdmin = adminNumber.some((phoneNumber) => {
-    console.log(data.to);
-    data.to === phoneNumber.trim();
-  });
+  const isAdmin = adminNumber.includes(data.to);
   console.log(isAdmin ? "This user is admin" : "Not admin");
 
   try {
@@ -132,6 +128,8 @@ app.post("/webhook", async (req, res) => {
 
             data
           );
+          needed.location = false;
+          needed.destination = false;
         }
         tem = false;
       }
@@ -207,6 +205,8 @@ app.post("/webhook", async (req, res) => {
             data
           );
           await delay(3000);
+          needed.location = false;
+          needed.destination = false;
 
           if (isAdmin) {
             send_button(
@@ -477,6 +477,8 @@ app.post("/webhook", async (req, res) => {
         data
       );
     } else if (data.msg == "/menu") {
+      needed.location = false;
+      needed.destination = false;
       if (isAdmin) {
         send_button(
           "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
