@@ -96,10 +96,10 @@ let tem = true;
 app.post("/webhook", async (req, res) => {
   const data = req.body;
   const isAdmin = adminNumber.some((phoneNumber) => {
-    console.log(phoneNumber);
     console.log(data.to);
     data.to === phoneNumber.trim();
   });
+  console.log(isAdmin ? "This user is admin" : "Not admin");
 
   try {
     const user = await User.findOne({ phone: data.to });
