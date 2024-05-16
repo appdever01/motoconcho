@@ -27,10 +27,9 @@ const {
   validateLocation,
   getLanguageMessage,
   delay,
-  needed,
 } = require("./func");
 
-const adminNumber = ["2347049972537", "18096657332"];
+const adminNumber = ["2347049972537", "18096657332//"];
 
 app.use(express.json());
 
@@ -61,13 +60,9 @@ const getUserCount = async () => {
   }
 };
 
-let newUser = new User({
-  fullname: "",
-  email: "user@example.com",
-  language: "english",
-  language: ["", ""],
-  phone: "",
-});
+const userMap = new Map();
+const tripMap = new Map();
+const needsMap = new Map();
 
 const newDriver = new Driver({
   fullname: "",
@@ -80,23 +75,79 @@ const newDriver = new Driver({
   plateNumber: "",
 });
 
-const newTrip = new Trip({
-  location: [],
-  destination: [],
-  name: "",
-  address: "",
-  phone: "",
-  driverPhone: "",
-});
-
-let usr = User({});
-
 let tem = true;
 app.post("/webhook", async (req, res) => {
+  let newUser = User({});
+  let newTrip = Trip({});
+  let needed = {};
+  let usr = User({});
   const data = req.body;
   const isAdmin = adminNumber.includes(data.to);
-  console.log(isAdmin ? "This user is admin" : "Not admin");
 
+  // working with user map-------------
+  // working with user map-------------
+  // working with user map-------------
+
+  if (userMap.has(data.to)) {
+    newUser = userMap.get(data.to);
+  } else {
+    let newUser = new User({
+      fullname: "",
+      email: "user@example.com",
+      language: "english",
+      language: ["", ""],
+      phone: data.to,
+    });
+    userMap.set(data.to, newUser);
+  }
+
+  // working with trip map-------------
+  // working with trip map-------------
+  // working with trip map-------------
+
+  if (tripMap.has(data.to)) {
+    newTrip = tripMap.get(data.to);
+  } else {
+    let newTrip = new Trip({
+      location: [],
+      destination: [],
+      name: "",
+      address: "",
+      phone: "",
+      driverPhone: "",
+    });
+    userMap.set(data.to, newTrip);
+  }
+
+  // working with needs map-------------
+  // working with needs map-------------
+  // working with needs map-------------
+
+  if (needsMap.has(data.to)) {
+    needed = needsMap.get(data.to);
+  } else {
+    needed = {
+      name: false,
+      email: false,
+      location: false,
+      destination: false,
+      welcome: true,
+      isUser: false,
+      address: false,
+      language: "english",
+      driver: {
+        name: false,
+        email: false,
+        address: false,
+        language: false,
+        vehicleName: false,
+        vehiclePic: false,
+        plateNo: false,
+      },
+    };
+    userMap.set(data.to, needed);
+  }
+  console.log(needed.language);
   try {
     const user = await User.findOne({ phone: data.to });
     const bannedUser = await User.findOne({ phone: data.to, banned: true });
@@ -108,38 +159,56 @@ app.post("/webhook", async (req, res) => {
       newUser = user;
 
       needed.language = usr.language;
+      needsMap.set(data.to, needed);
 
       if (tem && !data.msg.startsWith("/")) {
-        console.log("entered");
         if (isAdmin) {
           send_button(
-            "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
+            needed.language == "english"
+              ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
+              : "¡Hola *Administrador de MOTOCONCHO*! 🚀🌍 ¡Ahora puedes gestionar viajes, usuarios y conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞",
             [
-              { id: "create_trip", title: "Start a trip 🚕" },
-              { id: "admin_menu", title: "Admin menu 📋" },
+              {
+                id: "create_trip",
+                title: needed.language
+                  ? "Start a trip 🚕"
+                  : "Comenzar un viaje 🚕",
+              },
+              {
+                id: "admin_menu",
+                title:
+                  needed.language == "english"
+                    ? "Admin menu 📋"
+                    : "Admin menu 📋",
+              },
             ],
 
             data
           );
         } else {
           send_button(
-            `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`,
-            [{ id: "create_trip", title: "Start a trip 🚕" }],
+            needed.language == "english"
+              ? `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
+              : `¡Hola *${newUser.fullname}*! 🚀🌍 \n\nBienvenido de nuevo a MOTOCONCHO. Tu cuenta está registrada con el correo electrónico ${newUser.email}. 📧👍 Siéntete libre de comenzar o gestionar tus viajes y explorar opciones de conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞`,
+            [
+              {
+                id: "create_trip",
+                title: needed.language
+                  ? "Start a trip 🚕"
+                  : "Comenzar un viaje 🚕",
+              },
+            ],
 
             data
           );
-          needed.location = false;
-          needed.destination = false;
         }
         tem = false;
       }
     } else if (bannedUser !== null) {
-      send_message(
-        "🚫 Sorry, your account has been banned. If you believe this is a mistake, please contact support. 🙏",
-        data
-      );
+      send_message(getLanguageMessage("banMessage", needed.language), data);
     } else {
       newUser.phone = data.to;
+      userMap.set(data.to, newUser);
       if (needed.welcome && !data.msg.startsWith("/")) {
         send_button(
           getLanguageMessage("welcome_message", needed.language),
@@ -149,11 +218,12 @@ app.post("/webhook", async (req, res) => {
         await delay(3500);
 
         send_button(
-          "Hey there! 👋 Could you please choose your language? 🌐",
+          getLanguageMessage("chooseLanguage", needed.language),
           languageButtons,
           data
         );
         needed.welcome = false;
+        needsMap.set(data.to, needed);
       }
 
       if (needed.name) {
@@ -162,15 +232,21 @@ app.post("/webhook", async (req, res) => {
             /\b\w+/g,
             (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
           );
+
           needed.name = false;
           send_message(
-            `👋 Hello ${newUser.fullname}, what is your email? 📧`,
+            needed.language == "english"
+              ? `👋 Hello ${newUser.fullname}, what is your email? 📧`
+              : `👋 Hola ${newUser.fullname}, ¿cuál es tu correo electrónico? 📧`,
             data
           );
           await delay(1500);
           needed.email = true;
+          userMap.set(data.to, newUser);
+          needsMap.set(data.to, needed);
         } else {
           needed.name = true;
+          needsMap.set(data.to, needed);
           send_message(validateName(data), data);
         }
       }
@@ -182,6 +258,8 @@ app.post("/webhook", async (req, res) => {
           newUser.email = data.msg;
           needed.email = false;
           needed.location = true;
+          userMap.set(data.to, newUser);
+          needsMap.set(data.to, needed);
           send_template(
             "send_image",
             "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",
@@ -200,28 +278,61 @@ app.post("/webhook", async (req, res) => {
           needed.location = false;
           const cad = await caddress(data);
           send_button(
-            `Your current location has been received 📍🌍. You're almost set! You are currently in ${cad.city}, ${cad.country}.`,
-            [{ id: "change_location", title: "Change location 🌍" }],
+            needed.language == "english"
+              ? `Your current location has been received 📍🌍. You're almost set! You are currently in ${cad.city}, ${cad.country}.`
+              : `Tu ubicación actual ha sido recibida 📍🌍. ¡Casi listo! Actualmente te encuentras en ${cad.city}, ${cad.country}.`,
+            [
+              {
+                id: "change_location",
+                title:
+                  needed.language == "english"
+                    ? "Change location 🌍"
+                    : "Cambiar ubicación 🌍",
+              },
+            ],
             data
           );
           await delay(3000);
           needed.location = false;
           needed.destination = false;
+          tripMap.set(data.to, newTrip);
+          needsMap.set(data.to, needed);
 
           if (isAdmin) {
             send_button(
-              "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
+              needed.language == "english"
+                ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
+                : "¡Hola *Administrador de MOTOCONCHO*! 🚀🌍 ¡Ahora puedes gestionar viajes, usuarios y conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞",
               [
-                { id: "create_trip", title: "Start a trip 🚕" },
-                { id: "admin_menu", title: "Admin menu 📋" },
+                {
+                  id: "create_trip",
+                  title:
+                    needed.language == "english"
+                      ? "Start a trip 🚕"
+                      : "Comenzar un viaje 🚕",
+                },
+                {
+                  id: "admin_menu",
+                  title: "Admin menu 📋",
+                },
               ],
 
               data
             );
           } else {
             send_button(
-              `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`,
-              [{ id: "create_trip", title: "Start a trip 🚕" }],
+              needed.language == "english"
+                ? `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
+                : `¡Hola *${newUser.fullname}*! 🚀🌍 \n\nBienvenido de nuevo a MOTOCONCHO. Tu cuenta está registrada con el correo electrónico ${newUser.email}. 📧👍 Siéntete libre de comenzar o gestionar tus viajes y explorar opciones de conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞`,
+              [
+                {
+                  id: "create_trip",
+                  title:
+                    needed.language == "english"
+                      ? "Start a trip 🚕"
+                      : "Comenzar un viaje 🚕",
+                },
+              ],
 
               data
             );
@@ -246,10 +357,11 @@ app.post("/webhook", async (req, res) => {
         data.msg !== newUser.email
       ) {
         needed.location = true;
+        needsMap.set(data.to, needed);
         send_template(
           "send_image",
           "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",
-          null,
+          needed.language == "english" ? "en_US" : "es",
           data
         );
       }
@@ -259,6 +371,26 @@ app.post("/webhook", async (req, res) => {
     // Getting destination ---------------------------------------------------------
     // Getting destination ---------------------------------------------------------
 
+    if (needed.address) {
+      if (validateAddress(data) == true) {
+        newTrip.address = data.msg.trim();
+
+        send_template(
+          "get_dest",
+          "https://i.ibb.co/ng2664M/IMG-20240506-210439.jpg",
+          needed.language == "english" ? "en_US" : "es",
+          data
+        );
+        needed.destination = true;
+        tripMap.set(data.to, newTrip);
+        needsMap.set(data.to, needed);
+      } else {
+        needed.address = true;
+        needsMap.set(data.to, needed);
+        send_message(validateAddress(data), data);
+      }
+    }
+
     if (
       needed.destination &&
       JSON.stringify(newTrip.location) !==
@@ -267,24 +399,39 @@ app.post("/webhook", async (req, res) => {
       console.log(data);
       if (validateLocation(data) == true) {
         newTrip.destination = [data.lat, data.long];
+
         needed.destination = false;
         const cad = await caddress(data);
-        const msg = `📍 Your destination coordinates have been successfully saved to ${
-          data.name !== "" && data.address !== ""
-            ? `${data.name}, ${data.address}`
-            : cad.address
-        }:\n\n🌐 *Longitude:* ${parseFloat(data.long).toFixed(
-          4
-        )}\n🌐 *Latitude:*  ${parseFloat(data.lat).toFixed(
-          4
-        )}\n\nYou're all set to embark on your exciting journey! 🚀🗺 Get ready to explore new horizons! 🌅🌍`;
+        const msg =
+          needed.language == "english"
+            ? `📍 Your destination coordinates have been successfully saved to ${
+                data.name !== "" && data.address !== ""
+                  ? `${data.name}, ${data.address}`
+                  : cad.address
+              }:\n\n🌐 *Longitude:* ${parseFloat(data.long).toFixed(
+                4
+              )}\n🌐 *Latitude:*  ${parseFloat(data.lat).toFixed(
+                4
+              )}\n\nYou're all set to embark on your exciting journey! 🚀🗺 Get ready to explore new horizons! 🌅🌍`
+            : `📍 Tus coordenadas de destino se han guardado exitosamente en ${
+                data.name !== "" && data.address !== ""
+                  ? `${data.name}, ${data.address}`
+                  : cad.address
+              }:\n\n🌐 *Longitud:* ${parseFloat(data.long).toFixed(
+                4
+              )}\n🌐 *Latitud:*  ${parseFloat(data.lat).toFixed(
+                4
+              )}\n\n¡Estás listo para embarcarte en tu emocionante viaje! 🚀🗺 ¡Prepárate para explorar nuevos horizontes! 🌅🌍`;
         newTrip.name = data.name !== "" ? data.name : cad.city;
         newTrip.address = data.address !== "" ? data.name : cad.address;
+        tripMap.set(data.to, newTrip);
+        needsMap.set(data.to, needed);
 
         console.log(msg);
         send_button(msg, dest_confirm, data);
       } else {
         needed.destination = true;
+        needsMap.set(data.to, needed);
         send_message(validateLocation(data), data);
       }
     } else if (
@@ -295,7 +442,7 @@ app.post("/webhook", async (req, res) => {
       send_template(
         "send_image",
         "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",
-        null,
+        needed.language == "english" ? "en_US" : "es",
         data
       );
       needed.destination = false;
@@ -305,10 +452,11 @@ app.post("/webhook", async (req, res) => {
         JSON.stringify([data.lat.toString(), data.long.toString()])
     ) {
       send_message(
-        "⚠️ Warning: Destination cannot be the same as the location ⚠️",
+        getLanguageMessage("sameDestWarning", needed.language),
         data
       );
       needed.destination = true;
+      needsMap.set(data.to, needed);
     }
 
     // Collecting drivers detail ---------------------------------------------------------
@@ -323,13 +471,17 @@ app.post("/webhook", async (req, res) => {
         );
         needed.driver.name = false;
         send_message(
-          `*${newDriver.fullname}* is a nice name 👨‍✈️. What's the driver's email? 📧`,
+          needed.language == "english"
+            ? `*${newDriver.fullname}* is a nice name 👨‍✈️. What's the driver's email? 📧`
+            : `*${newDriver.fullname}* es un buen nombre 👨‍✈️. ¿Cuál es el correo electrónico del conductor? 📧`,
           data
         );
         await delay(1500);
         needed.driver.email = true;
+        needsMap.set(data.to, needed);
       } else {
         needed.driver.name = true;
+        needsMap.set(data.to, needed);
         send_message(validateName(data), data);
       }
     }
@@ -338,12 +490,11 @@ app.post("/webhook", async (req, res) => {
         newDriver.email = data.msg;
         needed.driver.email = false;
         needed.driver.phone = true;
-        send_message(
-          "Please provide the phone number of the driver you are adding ☎️",
-          data
-        );
+        needsMap.set(data.to, needed);
+        send_message(getLanguageMessage("providePhone", needed.language), data);
       } else {
         needed.driver.email = true;
+        needsMap.set(data.to, needed);
         send_message(validateMail(data), data);
       }
     }
@@ -352,12 +503,14 @@ app.post("/webhook", async (req, res) => {
         newDriver.phone = data.msg;
         needed.driver.phone = false;
         needed.driver.address = true;
+        needsMap.set(data.to, needed);
         send_message(
-          "Please provide the address of the driver you are adding 🏠",
+          getLanguageMessage("provideAddress", needed.language),
           data
         );
       } else {
         needed.driver.phone = true;
+        needsMap.set(data.to, needed);
         send_message(validatePhone(data), data);
       }
     }
@@ -366,9 +519,11 @@ app.post("/webhook", async (req, res) => {
         newDriver.address = data.msg;
         needed.driver.address = false;
         needed.driver.language = true;
-        send_message("What language does the driver speaks ? 🗣️🤔", data);
+        needsMap.set(data.to, needed);
+        send_message(getLanguageMessage("whatLanguage", needed.language), data);
       } else {
         needed.driver.address = true;
+        needsMap.set(data.to, needed);
         send_message(validateAddress(data), data);
       }
     }
@@ -377,10 +532,8 @@ app.post("/webhook", async (req, res) => {
         newDriver.language = data.msg;
         needed.driver.language = false;
         needed.driver.vehicleName = true;
-        send_message(
-          "Please provide the name of the vehicle the driver is using 🚗",
-          data
-        );
+        needsMap.set(data.to, needed);
+        send_message(getLanguageMessage("vehicleName", needed.language), data);
       } else {
         needed.driver.language = true;
         send_message(validateLanguage(data), data);
@@ -391,12 +544,16 @@ app.post("/webhook", async (req, res) => {
         newDriver.vehicleName = data.msg;
         needed.driver.vehicleName = false;
         needed.driver.vehiclePic = true;
+        needsMap.set(data.to, needed);
         send_message(
-          `Please provide the picture of the *${newDriver.vehicleName}* vehicle the driver is using 🚙`,
+          needed.language == "english"
+            ? `Please provide the picture of the *${newDriver.vehicleName}* vehicle the driver is using 🚙`
+            : `Por favor proporciona la imagen del vehículo *${newDriver.vehicleName}* que está usando el conductor 🚙`,
           data
         );
       } else {
         needed.driver.vehicleName = true;
+        needsMap.set(data.to, needed);
         send_message(validateVehicleName(data), data);
       }
     }
@@ -405,12 +562,16 @@ app.post("/webhook", async (req, res) => {
         newDriver.vehicleName = data.msg;
         needed.driver.vehicleName = false;
         needed.driver.vehiclePic = true;
+        needsMap.set(data.to, needed);
         send_message(
-          `Please provide the picture of the *${newDriver.vehicleName}* vehicle the driver is using 🚕`,
+          needed.language == "english"
+            ? `Please provide the picture of the *${newDriver.vehicleName}* vehicle the driver is using 🚕`
+            : `Por favor proporciona la imagen del vehículo *${newDriver.vehicleName}* que está usando el conductor 🚕`,
           data
         );
       } else {
         needed.driver.vehicleName = true;
+        needsMap.set(data.to, needed);
         send_message(validateVehicleName(data), data);
       }
     }
@@ -420,7 +581,9 @@ app.post("/webhook", async (req, res) => {
         needed.driver.vehiclePic = false;
 
         send_message(
-          `Please provide the plate number of the *${newDriver.vehicleName}* vehicle the driver is using 🪪`,
+          needed.language == "english"
+            ? `Please provide the plate number of the *${newDriver.vehicleName}* vehicle the driver is using 🪪`
+            : `Por favor proporciona el número de placa del vehículo *${newDriver.vehicleName}* que está usando el conductor 🪪`,
           data
         );
         needed.driver.plateNumber = true;
@@ -434,27 +597,26 @@ app.post("/webhook", async (req, res) => {
         newDriver.plateNumber = data.msg;
         console.log(newDriver.plateNumber);
         needed.driver.plateNumber = false;
+        needsMap.set(data.to, needed);
 
         newDriver
           .save()
           .then((savedDriver) => {
             console.log("Driver added successfully:", savedDriver);
-            send_message("*Please wait a moment* ⏳", data);
-            send_driver_template(null, data, newDriver);
-            send_button(
-              `👨‍✈️ Hello there! Welcome to the *MOTOCONCHO* Driver Management Menu 📋! \n\nCurrently, we have *${driverCount}* registered drivers. 🚗`,
-              [
-                { id: "add_driver", title: "Add New Driver 👨‍✈️" },
-                { id: "view_drivers", title: "View All Drivers 👥 " },
-              ],
+            send_message(
+              needed.language == "english"
+                ? "*Please wait a moment* ⏳"
+                : "*Por favor espera un momento* ⏳",
               data
             );
+            send_driver_template(null, data, newDriver);
           })
           .catch((error) => {
             console.error("Error saving user:", error);
           });
       } else {
         needed.driver.plateNumber = true;
+        needsMap.set(data.to, needed);
         send_message(validatePlate(data), data);
       }
     }
@@ -479,20 +641,42 @@ app.post("/webhook", async (req, res) => {
     } else if (data.msg == "/menu") {
       needed.location = false;
       needed.destination = false;
+      needsMap.set(data.to, needed);
       if (isAdmin) {
         send_button(
-          "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞",
+          needed.language == "english"
+            ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
+            : "¡Hola *Administrador de MOTOCONCHO*! 🚀🌍 ¡Ahora puedes gestionar viajes, usuarios y conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞",
           [
-            { id: "create_trip", title: "Start a trip 🚕" },
-            { id: "admin_menu", title: "Admin menu 📋" },
+            {
+              id: "create_trip",
+              title:
+                needed.language == "english"
+                  ? "Start a trip 🚕"
+                  : "Comenzar un viaje 🚕",
+            },
+            {
+              id: "admin_menu",
+              title: needed.language ? "Admin menu 📋" : "Admin menu 📋",
+            },
           ],
 
           data
         );
       } else {
         send_button(
-          `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`,
-          [{ id: "create_trip", title: "Start a trip 🚕" }],
+          needed.language == "english"
+            ? `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Your account is registered with the email ${newUser.email}. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
+            : `¡Hola *${newUser.fullname}*! 🚀🌍 \n\nBienvenido de nuevo a MOTOCONCHO. Tu cuenta está registrada con el correo electrónico ${newUser.email}. 📧👍 Siéntete libre de comenzar o gestionar tus viajes y explorar opciones de conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞`,
+          [
+            {
+              id: "create_trip",
+              title:
+                needed.language == "english"
+                  ? "Start a trip 🚕"
+                  : "Comenzar un viaje 🚕",
+            },
+          ],
 
           data
         );
@@ -514,21 +698,37 @@ app.post("/webhook", async (req, res) => {
           needed.language = "english";
           send_message("Your language has been set to English 🇬🇧", data);
           await delay(3000);
-          send_message("Could you kindly tell me your name? 😊👤", data);
+          send_message(
+            needed.language == "english"
+              ? "Could you kindly tell me your name? 😊👤"
+              : "¿Podrías decirme amablemente tu nombre? 😊👤",
+            data
+          );
           needed.name = true;
+          tripMap.set(data.to, newTrip);
+          needsMap.set(data.to, needed);
 
           break;
         case "btn_spa":
           newUser.language = "spanish";
           needed.language = "spanish";
-          send_message("Your language has been set to Spanish 🇪🇸", data);
+          needsMap.set(data.to, needed);
+          send_message("Tu idioma se ha establecido en español 🇪🇸", data);
           await delay(3000);
-          send_message("Could you kindly tell me your name? 😊👤", data);
+          send_message(
+            needed.language == "english"
+              ? "Could you kindly tell me your name? 😊👤"
+              : "¿Podrías decirme amablemente tu nombre? 😊👤",
+            data
+          );
           needed.name = true;
+          tripMap.set(data.to, newTrip);
+          needsMap.set(data.to, needed);
           break;
         case "change_location":
           needed.location = true;
           needed.destination = false;
+          needsMap.set(data.to, needed);
           send_template(
             "send_image",
             "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",
@@ -539,29 +739,33 @@ app.post("/webhook", async (req, res) => {
           break;
         case "change_destination":
           needed.location = false;
-          needed.destination = true;
-          send_template(
-            "get_dest",
-            "https://i.ibb.co/ng2664M/IMG-20240506-210439.jpg",
-            needed.language == "english" ? "en_US" : "es",
+          needed.address = true;
+          needsMap.set(data.to, needed);
+          send_message(
+            needed.language == "english"
+              ? "Please provide the address of where you are going to ! "
+              : "¡Por favor proporciona la dirección a la que te diriges! ",
             data
           );
 
           break;
         case "create_trip":
           await delay(1500);
-          send_template(
-            "get_dest",
-            "https://i.ibb.co/ng2664M/IMG-20240506-210439.jpg",
-            needed.language == "english" ? "en_US" : "es",
+          send_message(
+            needed.language == "english"
+              ? "Please provide the address of where you are going to ! "
+              : "¡Por favor proporciona la dirección a la que te diriges! ",
             data
           );
-          needed.destination = true;
+          needed.address = true;
+          needsMap.set(data.to, needed);
           break;
 
         case "check_driver":
           send_message(
-            "*Hang tight while I fetch available drivers for you!* ⏳🚗\n\nFeel free to alert any driver you like 📣, and once they accept your trip, I'll buzz you right back! 📩",
+            needed.language == "english"
+              ? "*Hang tight while I fetch available drivers for you!* ⏳🚗\n\nFeel free to alert any driver you like 📣, and once they accept your trip, I'll buzz you right back! 📩"
+              : "*¡Espera mientras busco conductores disponibles para ti!* ⏳🚗\n\n¡Siéntete libre de alertar a cualquier conductor que te guste 📣, y una vez que acepten tu viaje, te llamaré de inmediato! 📩",
             data
           );
           Driver.find({})
@@ -583,8 +787,11 @@ app.post("/webhook", async (req, res) => {
         case "cancel_trip":
           needed.location = false;
           needed.destination = false;
+          needsMap.set(data.to, needed);
           send_button(
-            "Your trip has been successfully cancelled ✅〽️",
+            needed.language == "english"
+              ? "Your trip has been successfully cancelled ✅"
+              : "Tu viaje ha sido cancelado exitosamente ✅",
             [{ id: "create_trip", title: "Start a trip 🚕" }],
             data
           );
@@ -592,7 +799,9 @@ app.post("/webhook", async (req, res) => {
           break;
         case "admin_menu":
           send_button(
-            "Hello there! Welcome to the *MOTOCONCHO* Admin Menu 📋!",
+            needed.language == "english"
+              ? "Hello there! Welcome to the *MOTOCONCHO* Admin Menu 📋!"
+              : "¡Hola! ¡Bienvenido al Menú de Administrador de *MOTOCONCHO* 📋!",
             adminBtn,
             data
           );
@@ -600,7 +809,9 @@ app.post("/webhook", async (req, res) => {
         case "manage_driver":
           const driverCount = await getDriverCount();
           send_button(
-            `👨‍✈️ Hello there! Welcome to the *MOTOCONCHO* Driver Management Menu 📋! \n\nCurrently, we have *${driverCount}* registered drivers. 🚗`,
+            needed.language == "english"
+              ? `👨‍✈️ Hello there! Welcome to the *MOTOCONCHO* Driver Management Menu 📋! \n\nCurrently, we have *${driverCount}* registered drivers. 🚗`
+              : `👨‍✈️ ¡Hola! ¡Bienvenido al Menú de Administración de Conductores de *MOTOCONCHO* 📋! \n\nActualmente, tenemos *${driverCount}* conductores registrados. 🚗`,
             [
               { id: "add_driver", title: "Add New Driver 👨‍✈️" },
               { id: "view_drivers", title: "View All Drivers 👥 " },
@@ -611,19 +822,29 @@ app.post("/webhook", async (req, res) => {
 
         case "add_driver":
           send_message(
-            "👋 Hey there! What's the name of the driver you are adding? ",
+            needed.language == "english"
+              ? "👋 Hey there! What's the name of the driver you are adding? "
+              : "👋 ¡Hola! ¿Cuál es el nombre del conductor que estás agregando? ",
             data
           );
           needed.driver.name = true;
+          needsMap.set(data.to, needed);
 
           break;
         case "view_drivers":
-          send_message("*Please wait while fetching all drivers* ⏳👨‍✈️", data);
+          send_message(
+            needed.language == "english"
+              ? "*Please wait while fetching all drivers* ⏳👨‍✈️"
+              : "*Por favor espera mientras se obtienen todos los conductores* ⏳👨‍✈️",
+            data
+          );
           Driver.find({})
             .then(async (drivers) => {
               if (drivers.length === 0) {
                 send_message(
-                  "No drivers found at the moment. Please try again later.",
+                  needed.language == "english"
+                    ? "No drivers found at the moment. Please try again later."
+                    : "No se encontraron conductores en este momento. Por favor, inténtalo de nuevo más tarde.",
                   data
                 );
               } else {
@@ -644,7 +865,9 @@ app.post("/webhook", async (req, res) => {
         case "manage_users":
           const userCount = await getUserCount();
           send_message(
-            `👨‍✈️ Hello there! Welcome to the *MOTOCONCHO* User Management 📋! \n\nCurrently, we have *${userCount}* registered users. 🚗`,
+            needed.language == "english"
+              ? `👨‍✈️ Hello there! Welcome to the *MOTOCONCHO* User Management 📋! \n\nCurrently, we have *${userCount}* registered users. 🚗`
+              : `👨‍✈️ ¡Hola! ¡Bienvenido a la Gestión de Usuarios de *MOTOCONCHO* 📋! \n\nActualmente, tenemos *${userCount}* usuarios registrados. 🚗`,
             data
           );
           await delay(3000);
@@ -680,13 +903,17 @@ app.post("/webhook", async (req, res) => {
       }
       if (data.btn_id.startsWith("confirm_")) {
         newTrip.phone = data.to;
+
         newTrip.driverPhone = data.btn_id.replace("confirm_", "");
+        tripMap.set(data.to, newTrip);
         newTrip
           .save()
           .then(async (savedTrip) => {
             console.log("Trip saved successfully:", savedTrip);
             send_button(
-              "🟢 You have successfully confirmed the trip driver. You can message the driver to continue with the tip discussion ✅🚕",
+              needed.language == "english"
+                ? "🟢 You have successfully confirmed the trip driver. You can message the driver to continue with the tip discussion ✅🚕"
+                : "🟢 Has confirmado exitosamente al conductor del viaje. Puedes enviar un mensaje al conductor para continuar con la discusión del viaje ✅🚕",
               [
                 { id: "create_trip", title: "Start a trip 🚕" },
                 { id: "cancel_trip", title: "Cancel trip ❎" },
@@ -769,18 +996,24 @@ app.post("/webhook", async (req, res) => {
             newTrip
           );
           send_message(
-            "🚨 The driver has been alerted! 🚨\nPlease expect a response soon regarding whether they *Accept* 🟢 or *Reject* 🔴 your trip.",
+            needed.language == "english"
+              ? "🚨 The driver has been alerted! 🚨\nPlease expect a response soon regarding whether they *Accept* 🟢 or *Reject* 🔴 your trip."
+              : "🚨 ¡El conductor ha sido alertado! 🚨\nPor favor, espera una respuesta pronto sobre si *Acepta* 🟢 o *Rechaza* 🔴 tu viaje.",
             data
           );
           break;
         case "Accept Trip":
           send_button(
-            "🟢 The driver has accepted your trip! \n\nPlease click on the contact below to chat with the driver. 👋🚕",
+            needed.language == "english"
+              ? "🟢 The driver has accepted your trip! \n\nPlease click on the contact below to chat with the driver. 👋🚕"
+              : "🟢 ¡El conductor ha aceptado tu viaje! \n\nPor favor, haz clic en el contacto a continuación para chatear con el conductor. 👋🚕",
             [{ id: `confirm_${data.wa_id}`, title: "Confirm ✅" }],
             { ...data, to: data.btn_payload }
           );
           send_message(
-            "🟢 You have successfully accepted the trip. 👋🚕\n\nOnce the user confirm you as the driver, you will receive thier contact. You can wait for it 🔰",
+            needed.language == "english"
+              ? "🟢 You have successfully accepted the trip. 👋🚕\n\nOnce the user confirm you as the driver, you will receive thier contact. You can wait for it 🔰"
+              : "🟢 Has aceptado el viaje exitosamente. 👋🚕\n\nUna vez que el usuario te confirme como conductor, recibirás su contacto. Puedes esperarlo 🔰",
             data
           );
           await delay(3000);
@@ -789,11 +1022,15 @@ app.post("/webhook", async (req, res) => {
           break;
         case "Reject Trip":
           send_message(
-            "🔴 The driver has rejected your trip! \n\nPlease try requesting another driver. 🚕",
+            needed.language == "english"
+              ? "🔴 The driver has rejected your trip! \n\nPlease try requesting another driver. 🚕"
+              : "🔴 ¡El conductor ha rechazado tu viaje! \n\nPor favor, intenta solicitar otro conductor. 🚕",
             { ...data, to: data.btn_payload }
           );
           send_message("🔴 You have successfully rejected the trip", data);
           needed.welcome = false;
+
+          needsMap.set(data.to, needed);
           break;
 
         default:
