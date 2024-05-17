@@ -221,14 +221,6 @@ app.post("/webhook", async (req, res) => {
           data
         );
         await delay(3500);
-        send_button(
-          getLanguageMessage("welcome_message", needed.language),
-          [{ id: "learn_more", title: "Learn more 🚖" }],
-          data
-        );
-
-        needed.welcome = false;
-        needsMap.set(data.to, needed);
       }
 
       if (needed.name) {
@@ -633,6 +625,15 @@ app.post("/webhook", async (req, res) => {
           needed.language = "english";
           send_message("Your language has been set to English 🇬🇧", data);
           await delay(3000);
+          send_button(
+            getLanguageMessage("welcome_message", needed.language),
+            [{ id: "learn_more", title: "Learn more 🚖" }],
+            data
+          );
+
+          needed.welcome = false;
+          needsMap.set(data.to, needed);
+          await delay(3000);
           send_message(
             needed.language == "english"
               ? "Could you kindly tell me your name? 😊👤"
@@ -649,6 +650,15 @@ app.post("/webhook", async (req, res) => {
           needed.language = "spanish";
           needsMap.set(data.to, needed);
           send_message("Tu idioma se ha establecido en español 🇪🇸", data);
+          await delay(3000);
+          send_button(
+            getLanguageMessage("welcome_message", needed.language),
+            [{ id: "learn_more", title: "Learn more 🚖" }],
+            data
+          );
+
+          needed.welcome = false;
+          needsMap.set(data.to, needed);
           await delay(3000);
           send_message(
             needed.language == "english"
