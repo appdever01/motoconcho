@@ -492,14 +492,6 @@ const trip_alert = (lang, to, user, trip) => {
               type: "text",
               text: trip.address,
             },
-            {
-              type: "text",
-              text: lat,
-            },
-            {
-              type: "text",
-              text: long,
-            },
           ],
         },
         {

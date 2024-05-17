@@ -29,7 +29,7 @@ const {
   delay,
 } = require("./func");
 
-const adminNumber = ["2347049972537", "18096657332//"];
+const adminNumber = ["2347049972537", "18096657332"];
 
 app.use(express.json());
 
@@ -210,7 +210,11 @@ app.post("/webhook", async (req, res) => {
     } else {
       newUser.phone = data.to;
       userMap.set(data.to, newUser);
-      if (needed.welcome && !data.msg.startsWith("/")) {
+      if (
+        needed.welcome &&
+        !data.msg.startsWith("/") &&
+        data.type !== "button"
+      ) {
         send_button(
           getLanguageMessage("welcome_message", needed.language),
           [{ id: "learn_more", title: "Learn more 🚖" }],
@@ -733,13 +737,15 @@ app.post("/webhook", async (req, res) => {
           needed.location = false;
           needed.destination = false;
           needsMap.set(data.to, needed);
-          send_button(
-            needed.language == "english"
-              ? "Your trip has been successfully cancelled ✅"
-              : "Tu viaje ha sido cancelado exitosamente ✅",
-            [{ id: "create_trip", title: "Start a trip 🚕" }],
-            data
-          );
+          Trip.deleteOne({ phone: `+${data.to}` }).then((result) => {
+            send_button(
+              needed.language == "english"
+                ? "Your trip has been successfully cancelled ✅"
+                : "Tu viaje ha sido cancelado exitosamente ✅",
+              [{ id: "create_trip", title: "Start a new trip 🚕" }],
+              data
+            );
+          });
 
           break;
         case "admin_menu":
@@ -941,6 +947,8 @@ app.post("/webhook", async (req, res) => {
       if (data.btn_text == "Accept Trip" || data.btn_text == "Aceptar viaje") {
         console.log("trippinggg");
         console.log(data.btn_payload);
+        needed.welcome = false;
+        needsMap.set(data.to, needed);
         const latestTrip = await Trip.findOne({ phone: data.btn_payload }).sort(
           { _id: -1 }
         );
@@ -1008,10 +1016,13 @@ app.post("/webhook", async (req, res) => {
         data.btn_text == "Reject Trip" ||
         data.btn_text == "Rechazar viaje"
       ) {
-        send_message(
+        needed.welcome = false;
+        needsMap.set(data.to, needed);
+        send_button(
           needed.language == "english"
             ? "🔴 A driver rejected your trip, wait if another driver will accept. "
             : "🔴 Un conductor rechazó tu viaje, espera a que otro conductor lo acepte. 🚕",
+          [{ id: "cancel_trip", title: "Cancel trip ❎" }],
           { ...data, to: data.btn_payload }
         );
         send_message("🔴 You have successfully rejected the trip", data);

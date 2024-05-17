@@ -135,19 +135,19 @@ function validateLanguage(data) {
 }
 
 function validateLocation(data) {
-  // const sousaDominicanBoundaries = {
-  //   minLat: 19.7519 - 0.1, // Adjusted latitude boundary by 0.1 degrees
-  //   maxLat: 19.7519 + 0.1,
-  //   minLong: -70.5189 - 0.1, // Adjusted longitude boundary by 0.1 degrees
-  //   maxLong: -70.5189 + 0.1,
-  // };
-
   const sousaDominicanBoundaries = {
-    minLat: 4.5, // Adjusted latitude boundary by 0.1 degrees
-    maxLat: 13.5,
-    minLong: 2.5, // Adjusted longitude boundary by 0.1 degrees
-    maxLong: 14.5,
+    minLat: 19.6019,
+    maxLat: 19.9019,
+    minLong: 70.6189,
+    maxLong: 70.4189,
   };
+
+  // const sousaDominicanBoundaries = {
+  //   minLat: 4.5,
+  //   maxLat: 13.5,
+  //   minLong: 2.5,
+  //   maxLong: 14.5,
+  // };
 
   if (
     data.lat >= sousaDominicanBoundaries.minLat &&
