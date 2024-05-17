@@ -216,17 +216,17 @@ app.post("/webhook", async (req, res) => {
         data.type !== "button"
       ) {
         send_button(
-          getLanguageMessage("welcome_message", needed.language),
-          [{ id: "learn_more", title: "Learn more 🚖" }],
-          data
-        );
-        await delay(3500);
-
-        send_button(
           getLanguageMessage("chooseLanguage", needed.language),
           languageButtons,
           data
         );
+        await delay(3500);
+        send_button(
+          getLanguageMessage("welcome_message", needed.language),
+          [{ id: "learn_more", title: "Learn more 🚖" }],
+          data
+        );
+
         needed.welcome = false;
         needsMap.set(data.to, needed);
       }
