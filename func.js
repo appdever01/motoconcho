@@ -47,6 +47,19 @@ function validateMail(data) {
   }
 }
 
+function validateTicket(data) {
+  const trimmedTicket = data.msg.trim();
+  const ticketRegex = /^(?:100|[1-9]?[0-9])$/; // Regular expression to match numbers from 1 to 100
+
+  if (data.type == "text" && !ticketRegex.test(trimmedTicket)) {
+    return "Please provide a valid number between 1 and 100 for the ticket. 🎫";
+  } else if (data.type !== "text" || typeof trimmedTicket !== "string") {
+    return "Please provide a valid number for the ticket. 🎫";
+  } else {
+    return true;
+  }
+}
+
 function validateAddress(data) {
   const trimmedAddress = data.msg.trim();
 
@@ -122,11 +135,18 @@ function validateLanguage(data) {
 }
 
 function validateLocation(data) {
+  // const sousaDominicanBoundaries = {
+  //   minLat: 19.7519 - 0.1, // Adjusted latitude boundary by 0.1 degrees
+  //   maxLat: 19.7519 + 0.1,
+  //   minLong: -70.5189 - 0.1, // Adjusted longitude boundary by 0.1 degrees
+  //   maxLong: -70.5189 + 0.1,
+  // };
+
   const sousaDominicanBoundaries = {
-    minLat: 19.7519 - 0.1, // Adjusted latitude boundary by 0.1 degrees
-    maxLat: 19.7519 + 0.1,
-    minLong: -70.5189 - 0.1, // Adjusted longitude boundary by 0.1 degrees
-    maxLong: -70.5189 + 0.1,
+    minLat: 4.5, // Adjusted latitude boundary by 0.1 degrees
+    maxLat: 13.5,
+    minLong: 2.5, // Adjusted longitude boundary by 0.1 degrees
+    maxLong: 14.5,
   };
 
   if (
@@ -165,5 +185,6 @@ module.exports = {
   validatePlate,
   validateVehicleName,
   getLanguageMessage,
+  validateTicket,
   delay,
 };

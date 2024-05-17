@@ -11,12 +11,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
+
   language: {
     type: String,
     required: true,
@@ -35,18 +30,17 @@ const driverSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
+
   language: {
     type: String,
     required: true,
   },
   address: {
     type: String,
+    required: true,
+  },
+  ticket: {
+    type: Number,
     required: true,
   },
   vehicleName: {
@@ -89,13 +83,18 @@ const tripSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  gotDriver: {
+    type: Boolean,
+  },
+  driverId: {
+    type: String,
+  },
   phone: {
     type: String,
     required: true,
   },
   driverPhone: {
     type: String,
-    required: true,
   },
 });
 

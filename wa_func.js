@@ -206,7 +206,7 @@ const send_driver_template = (lang, data, driver) => {
     to: data.to,
     type: "template",
     template: {
-      name: "send_driver",
+      name: "send_driverr",
       language: {
         code: lang || "en_US",
       },
@@ -227,12 +227,9 @@ const send_driver_template = (lang, data, driver) => {
           parameters: [
             {
               type: "text",
-              text: driver.fullname,
+              text: `${driver.fullname} (${driver.ticket} Tickets Remain)`,
             },
-            {
-              type: "text",
-              text: driver.email,
-            },
+
             {
               type: "text",
               text: driver.phone,
@@ -259,6 +256,17 @@ const send_driver_template = (lang, data, driver) => {
           type: "button",
           sub_type: "quick_reply",
           index: "0",
+          parameters: [
+            {
+              type: "payload",
+              payload: driver.phone,
+            },
+          ],
+        },
+        {
+          type: "button",
+          sub_type: "quick_reply",
+          index: "1",
           parameters: [
             {
               type: "payload",

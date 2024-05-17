@@ -4,7 +4,7 @@ const languageButtons = [
 ];
 const dest_confirm = [
   { id: "change_destination ", title: " Change destination 🔄" },
-  { id: "check_driver", title: " View drivers 🚗" },
+  { id: "check_driver", title: " Continue  🚗" },
   { id: "cancel_trip", title: " Cancel Trip ❎" },
 ];
 
