@@ -229,7 +229,11 @@ app.post("/webhook", async (req, res) => {
         await delay(3500);
       }
 
-      if (needed.name) {
+      if (
+        needed.name &&
+        data.type !== "button" &&
+        data.type !== "interactive"
+      ) {
         if (validateName(data) == true) {
           newUser.fullname = data.msg.replace(
             /\b\w+/g,
@@ -670,7 +674,6 @@ app.post("/webhook", async (req, res) => {
               data
             );
 
-            await delay(3000);
             send_message(
               needed.language == "english"
                 ? "Could you kindly tell me your name? 😊👤"
@@ -706,7 +709,6 @@ app.post("/webhook", async (req, res) => {
               data
             );
 
-            await delay(3000);
             send_message(
               needed.language == "english"
                 ? "Could you kindly tell me your name? 😊👤"
