@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   banned: { type: Boolean, default: false },
+  isDriver: { type: Boolean, default: false },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -95,6 +96,10 @@ const tripSchema = new mongoose.Schema({
   },
   driverPhone: {
     type: String,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 

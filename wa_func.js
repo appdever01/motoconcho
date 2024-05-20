@@ -194,7 +194,7 @@ const send_location_template = (lang, data, address) => {
     });
 };
 
-const send_driver_template = (lang, data, driver) => {
+const send_driver_template = (lang, data, driver, trip_accepted) => {
   const axios = require("axios");
   console.log({
     type: "text",
@@ -227,7 +227,11 @@ const send_driver_template = (lang, data, driver) => {
           parameters: [
             {
               type: "text",
-              text: `${driver.fullname} (${driver.ticket} Tickets Remain)`,
+              text: driver.fullname,
+            },
+            {
+              type: "text",
+              text: trip_accepted,
             },
 
             {

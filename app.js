@@ -96,7 +96,8 @@ app.post("/webhook", async (req, res) => {
     let newUser = new User({
       fullname: "",
       language: "english",
-      language: ["", ""],
+      location: ["", ""],
+      isDriver: false,
       phone: data.to,
     });
     userMap.set(data.to, newUser);
@@ -119,7 +120,7 @@ app.post("/webhook", async (req, res) => {
       phone: "",
       driverPhone: "",
     });
-    userMap.set(data.to, newTrip);
+    tripMap.set(data.to, newTrip);
   }
 
   // working with needs map-------------
@@ -158,6 +159,7 @@ app.post("/webhook", async (req, res) => {
       // console.log("User found:", user);
       usr = user;
       newUser = user;
+      needed.welcome = false;
 
       needed.language = usr.language;
       needsMap.set(data.to, needed);
@@ -175,6 +177,7 @@ app.post("/webhook", async (req, res) => {
                   ? "Start a trip 🚕"
                   : "Comenzar un viaje 🚕",
               },
+              { id: "trip_history", title: "Trip History 📜" },
               {
                 id: "admin_menu",
                 title:
@@ -198,6 +201,8 @@ app.post("/webhook", async (req, res) => {
                   ? "Start a trip 🚕"
                   : "Comenzar un viaje 🚕",
               },
+
+              { id: "trip_history", title: "Trip History 📜" },
             ],
 
             data
@@ -213,7 +218,8 @@ app.post("/webhook", async (req, res) => {
       if (
         needed.welcome &&
         !data.msg.startsWith("/") &&
-        data.type !== "button"
+        data.type !== "button" &&
+        data.type !== "interactive"
       ) {
         send_button(
           getLanguageMessage("chooseLanguage", needed.language),
@@ -287,6 +293,7 @@ app.post("/webhook", async (req, res) => {
                       ? "Start a trip 🚕"
                       : "Comenzar un viaje 🚕",
                 },
+                { id: "trip_history", title: "Trip History 📜" },
                 {
                   id: "admin_menu",
                   title: "Admin menu 📋",
@@ -308,6 +315,8 @@ app.post("/webhook", async (req, res) => {
                       ? "Start a trip 🚕"
                       : "Comenzar un viaje 🚕",
                 },
+
+                { id: "trip_history", title: "Trip History 📜" },
               ],
 
               data
@@ -518,22 +527,29 @@ app.post("/webhook", async (req, res) => {
         console.log(newDriver.plateNumber);
         needed.driver.plateNumber = false;
         needsMap.set(data.to, needed);
-
-        newDriver
-          .save()
-          .then((savedDriver) => {
-            console.log("Driver added successfully:", savedDriver);
-            send_message(
-              needed.language == "english"
-                ? "*Please wait a moment* ⏳"
-                : "*Por favor espera un momento* ⏳",
-              data
-            );
-            send_driver_template(null, data, newDriver);
-          })
-          .catch((error) => {
-            console.error("Error saving user:", error);
-          });
+        (newUser.fullname = newDriver.fullname),
+          (newUser.language = newDriver.language),
+          (newUser.phone = newDriver.phone),
+          (newUser.isDriver = true),
+          (newUser.location = [""]),
+          newDriver
+            .save()
+            .then((savedDriver) => {
+              newUser.save().then((savedDriverUser) => {
+                console.log("Driver added as user:", savedDriverUser);
+              });
+              console.log("Driver added successfully:", savedDriver);
+              send_message(
+                needed.language == "english"
+                  ? "*Please wait a moment* ⏳"
+                  : "*Por favor espera un momento* ⏳",
+                data
+              );
+              send_driver_template(null, data, newDriver, 0);
+            })
+            .catch((error) => {
+              console.error("Error saving user:", error);
+            });
       } else {
         needed.driver.plateNumber = true;
         needsMap.set(data.to, needed);
@@ -575,6 +591,7 @@ app.post("/webhook", async (req, res) => {
                   ? "Start a trip 🚕"
                   : "Comenzar un viaje 🚕",
             },
+            { id: "trip_history", title: "Trip History 📜" },
             {
               id: "admin_menu",
               title: needed.language ? "Admin menu 📋" : "Admin menu 📋",
@@ -602,6 +619,8 @@ app.post("/webhook", async (req, res) => {
                     ? "Start a trip 🚕"
                     : "Comenzar un viaje 🚕",
               },
+
+              { id: "trip_history", title: "Trip History 📜" },
             ],
 
             data
@@ -610,6 +629,7 @@ app.post("/webhook", async (req, res) => {
       }
       tem = false;
     }
+
     if (data.type === "interactive") {
       switch (data.btn_id) {
         case "learn_more":
@@ -620,28 +640,49 @@ app.post("/webhook", async (req, res) => {
             data
           );
           break;
+
+        case "terms_policies":
+          send_message(
+            needed.language == "english"
+              ? `📜 Terms and Policies for MOTOCONCHO Bot: \n\nWelcome to MOTOCONCHO Bot! By using our services, you agree to the following terms and policies: \n\n1. Service Usage: \n   - MOTOCONCHO Bot provides automated assistance for trip management and related services. \n   - Users are responsible for the accuracy and completeness of the information provided to the bot. \n\n2. Trip Management: \n   - Users can start, manage, and cancel trips using the bot. \n   - Trips should adhere to local regulations and safety standards. \n\n3. Data Privacy: \n   - MOTOCONCHO Bot respects user privacy and does not share personal information with third parties. \n   - User data is securely stored and used only for trip-related purposes. \n\n4. User Conduct: \n   - Users are expected to communicate respectfully with the bot and other users. \n   - Any misuse or abuse of the bot will result in account suspension. \n\n5. Trip Pricing: \n   - Trips arranged through the bot should adhere to the specified pricing guidelines. \n   - Users should not negotiate prices beyond the set limits. \n\n6. Liability: \n   - MOTOCONCHO Bot is not liable for any incidents or accidents occurring during trips. \n   - Users are responsible for their safety and well-being during trips. \n\n7. Changes to Terms: \n   - MOTOCONCHO Bot reserves the right to update these terms and policies as needed. \n   - Users will be notified of any changes to the terms. \n\nBy using MOTOCONCHO Bot, you agree to abide by these terms and policies. If you have any questions or concerns, please contact our support team.`
+              : `📜 Términos y Políticas para el Bot de MOTOCONCHO: \n\n¡Bienvenido al Bot de MOTOCONCHO! Al utilizar nuestros servicios, aceptas los siguientes términos y políticas: \n\n1. Uso del Servicio: \n   - El Bot de MOTOCONCHO proporciona asistencia automatizada para la gestión de viajes y servicios relacionados. \n   - Los usuarios son responsables de la precisión y completitud de la información proporcionada al bot. \n\n2. Gestión de Viajes: \n   - Los usuarios pueden iniciar, gestionar y cancelar viajes utilizando el bot. \n   - Los viajes deben cumplir con las regulaciones locales y normas de seguridad. \n\n3. Privacidad de Datos: \n   - El Bot de MOTOCONCHO respeta la privacidad del usuario y no comparte información personal con terceros. \n   - Los datos de usuario se almacenan de forma segura y se utilizan únicamente con fines relacionados con los viajes. \n\n4. Conducta del Usuario: \n   - Se espera que los usuarios se comuniquen de manera respetuosa con el bot y otros usuarios. \n   - Cualquier mal uso o abuso del bot resultará en la suspensión de la cuenta. \n\n5. Precios de los Viajes: \n   - Los viajes organizados a través del bot deben cumplir con las pautas de precios especificadas. \n   - Los usuarios no deben negociar precios más allá de los límites establecidos. \n\n6. Responsabilidad: \n   - El Bot de MOTOCONCHO no se hace responsable de incidentes o accidentes ocurridos durante los viajes. \n   - Los usuarios son responsables de su seguridad y bienestar durante los viajes. \n\n7. Cambios en los Términos: \n   - El Bot de MOTOCONCHO se reserva el derecho de actualizar estos términos y políticas según sea necesario. \n   - Se notificará a los usuarios de cualquier cambio en los términos. \n\nAl utilizar el Bot de MOTOCONCHO, aceptas cumplir con estos términos y políticas. Si tienes alguna pregunta o inquietud, por favor contacta a nuestro equipo de soporte.`,
+            data
+          );
+          break;
         case "btn_eng":
           newUser.language = "english";
           needed.language = "english";
           send_message("Your language has been set to English 🇬🇧", data);
           await delay(3000);
-          send_button(
-            getLanguageMessage("welcome_message", needed.language),
-            [{ id: "learn_more", title: "Learn more 🚖" }],
-            data
-          );
+          console.log(data.type);
 
+          if (
+            needed.welcome &&
+            !data.msg.startsWith("/") &&
+            data.type !== "button"
+          ) {
+            send_button(
+              getLanguageMessage("welcome_message", needed.language),
+              [
+                { id: "learn_more", title: "Learn more 🚖" },
+                { id: "terms_policies", title: "Terms and Policy ℹ️" },
+              ],
+              data
+            );
+
+            await delay(3000);
+            send_message(
+              needed.language == "english"
+                ? "Could you kindly tell me your name? 😊👤"
+                : "¿Podrías decirme amablemente tu nombre? 😊👤",
+              data
+            );
+            needed.name = true;
+            tripMap.set(data.to, newTrip);
+            needsMap.set(data.to, needed);
+          }
           needed.welcome = false;
-          needsMap.set(data.to, needed);
-          await delay(3000);
-          send_message(
-            needed.language == "english"
-              ? "Could you kindly tell me your name? 😊👤"
-              : "¿Podrías decirme amablemente tu nombre? 😊👤",
-            data
-          );
-          needed.name = true;
-          tripMap.set(data.to, newTrip);
+
           needsMap.set(data.to, needed);
 
           break;
@@ -651,24 +692,35 @@ app.post("/webhook", async (req, res) => {
           needsMap.set(data.to, needed);
           send_message("Tu idioma se ha establecido en español 🇪🇸", data);
           await delay(3000);
-          send_button(
-            getLanguageMessage("welcome_message", needed.language),
-            [{ id: "learn_more", title: "Learn more 🚖" }],
-            data
-          );
+          if (
+            needed.welcome &&
+            !data.msg.startsWith("/") &&
+            data.type !== "button"
+          ) {
+            send_button(
+              getLanguageMessage("welcome_message", needed.language),
+              [
+                { id: "learn_more", title: "Learn more 🚖" },
+                { id: "terms_policies", title: "Terms and Policy ℹ️" },
+              ],
+              data
+            );
+
+            await delay(3000);
+            send_message(
+              needed.language == "english"
+                ? "Could you kindly tell me your name? 😊👤"
+                : "¿Podrías decirme amablemente tu nombre? 😊👤",
+              data
+            );
+            needed.name = true;
+            tripMap.set(data.to, newTrip);
+            needsMap.set(data.to, needed);
+          }
 
           needed.welcome = false;
           needsMap.set(data.to, needed);
-          await delay(3000);
-          send_message(
-            needed.language == "english"
-              ? "Could you kindly tell me your name? 😊👤"
-              : "¿Podrías decirme amablemente tu nombre? 😊👤",
-            data
-          );
-          needed.name = true;
-          tripMap.set(data.to, newTrip);
-          needsMap.set(data.to, needed);
+
           break;
         case "change_location":
           needed.location = true;
@@ -716,6 +768,41 @@ app.post("/webhook", async (req, res) => {
                 : "Tu información de viaje ha sido enviada a todos nuestros conductores disponibles. Por favor, espera a que uno de ellos acepte el viaje. ¡Siéntete libre de alertar a cualquier conductor que desees! 🚗📣 Una vez que acepten tu viaje, ¡te notificaré de inmediato! 📩",
               data
             );
+            await delay(2000);
+            send_message(
+              needed.language == "english"
+                ? "🚨 Trip Alert! 🚨\n\nPlease ensure that the driver details match and that they have the required jacket. Remember:\n\n- Trips cannot cost more than RD$500 ($10) 💸\n- For any delivery, do not give more than RD$1000 ($20) 💰\n\n*MOTOCONCHO © 2024*"
+                : "🚨 ¡Alerta de Viaje! 🚨\n\nPor favor asegúrate de que los detalles del conductor coincidan y que tengan la chaqueta requerida. Recuerda:\n\n- Los viajes no pueden costar más de RD$500 ($10) 💸\n- Para cualquier entrega, no des más de RD$1000 ($20) 💰\n\n*MOTOCONCHO © 2024*",
+              data
+            );
+
+            // Check if gotDriver didn't change to true after 10 minutes and delete the trip if needed
+            setInterval(() => {
+              Trip.findOne({ phone: `${data.to}`, gotDriver: false }).then(
+                (trip) => {
+                  console.log(trip);
+                  if (trip) {
+                    console.log("deleting trip");
+                    Trip.deleteOne({
+                      phone: `${data.to}`,
+                      gotDriver: false,
+                    }).then(() => {
+                      send_button(
+                        needed.language == "english"
+                          ? "🚨 Trip Alert! 🚨\n\nYour trip has been automatically cancelled as no drivers accepted it within 10 minutes. Please start a new trip."
+                          : "🚨 ¡Alerta de Viaje! 🚨\n\nTu viaje ha sido cancelado automáticamente ya que ningún conductor lo aceptó en 10 minutos. Por favor, inicia un nuevo viaje. ",
+                        [
+                          { id: "create_trip", title: "Start a new trip 🚕" },
+                          { id: "trip_history", title: "Trip History 📜" },
+                        ],
+                        data
+                      );
+                    });
+                  }
+                }
+              );
+            }, 240000);
+
             Driver.find({})
               .then(async (drivers) => {
                 if (drivers.length === 0) {
@@ -728,7 +815,9 @@ app.post("/webhook", async (req, res) => {
                 } else {
                   for (const driver of drivers) {
                     trip_alert(
-                      driver.language == "English" ? "en_US" : "es",
+                      driver.language.toLocaleLowerCase() == "english"
+                        ? "en_US"
+                        : "es",
                       driver.phone,
                       newUser,
                       newTrip
@@ -757,6 +846,35 @@ app.post("/webhook", async (req, res) => {
             );
           });
 
+          break;
+
+        case "trip_history":
+          Trip.find({ phone: `${data.to}` }).then(async (trips) => {
+            console.log(trips.length);
+            if (trips.length > 0) {
+              send_message(
+                "*Please wait while fetching all your trips* ⏳",
+                data
+              );
+              for (const trip of trips) {
+                send_message(
+                  needed.language == "english"
+                    ? `Trip Details 🚗📅\n\n- Destination Address: ${trip.address}\n- User's Phone: ${trip.phone}\n- Driver's Phone: ${trip.driverPhone}\n- Date Created: ${trip.createdAt}`
+                    : `Detalles del Viaje 🚗📅\n\n- Dirección de Destino: ${trip.address}\n- Teléfono: ${trip.phone}\n- Teléfono del Conductor: ${trip.driverPhone}\n- Fecha de Creación: ${trip.createdAt}`,
+                  data
+                );
+                delay(2000);
+              }
+            } else {
+              send_button(
+                needed.language == "english"
+                  ? "*You haven't created any trips before !!!* 🚫"
+                  : "*¡No has creado ningún viaje antes!!!* 🚫",
+                [{ id: "create_trip", title: "Start a new trip 🚕" }],
+                data
+              );
+            }
+          });
           break;
         case "admin_menu":
           send_button(
@@ -805,7 +923,7 @@ app.post("/webhook", async (req, res) => {
           needsMap.set(data.to, needed);
           Driver.find({})
             .then(async (drivers) => {
-              if (drivers.length === 0) {
+              if (drivers.length < 1) {
                 send_message(
                   needed.language == "english"
                     ? "No drivers found at the moment. Please try again later."
@@ -814,11 +932,19 @@ app.post("/webhook", async (req, res) => {
                 );
               } else {
                 for (const driver of drivers) {
-                  send_driver_template(
-                    needed.language == "english" ? "en_US" : "es",
-                    data,
-                    driver
-                  );
+                  console.log(`Driver phoner :::: ${driver.phone}`);
+                  Trip.findOne({ driverPhone: `${driver.phone}` })
+                    .count()
+                    .then((count) => {
+                      console.log(`count :::: ${count}`);
+                      send_driver_template(
+                        needed.language == "english" ? "en_US" : "es",
+                        data,
+                        driver,
+                        count
+                      );
+                    });
+
                   await delay(3000);
                 }
               }
@@ -826,6 +952,30 @@ app.post("/webhook", async (req, res) => {
             .catch((err) => {
               console.error("Error fetching drivers:", err);
             });
+          break;
+        case "manage_trips":
+          Trip.find({}).then(async (trips) => {
+            if (trips) {
+              send_message("*Please wait while fetching all trips* ⏳👨‍✈️", data);
+              for (const trip of trips) {
+                send_message(
+                  needed.language == "english"
+                    ? ` Trip Details 🚗📅\n\n- Destination Address: ${trip.address}\n- Phone: ${trip.phone}\n- Driver's Phone: ${trip.driverPhone}\n- Date Created: ${trip.createdAt}`
+                    : ` Detalles del Viaje 🚗📅\n\n- Dirección de Destino: ${trip.address}\n- Teléfono: ${trip.phone}\n- Teléfono del Conductor: ${trip.driverPhone}\n- Fecha de Creación: ${trip.createdAt}`,
+                  data
+                );
+                delay(2000);
+              }
+            } else {
+              send_button(
+                needed.language == "english"
+                  ? "*No one has created trips before !!!* 🚫"
+                  : "*¡Nadie ha creado viajes antes!!!* 🚫",
+                [{ id: "create_trip", title: "Start a new trip 🚕" }],
+                data
+              );
+            }
+          });
           break;
         case "manage_users":
           const userCount = await getUserCount();
@@ -872,7 +1022,7 @@ app.post("/webhook", async (req, res) => {
             ? "🟢 You have successfully confirmed the trip driver. You can message the driver to continue with the tip discussion ✅🚕"
             : "🟢 Has confirmado exitosamente al conductor del viaje. Puedes enviar un mensaje al conductor para continuar con la discusión del viaje ✅🚕",
           [
-            { id: "create_trip", title: "Start a trip 🚕" },
+            { id: "create_trip", title: "Start a new trip 🚕" },
             { id: "cancel_trip", title: "Cancel trip ❎" },
           ],
           data
@@ -977,7 +1127,13 @@ app.post("/webhook", async (req, res) => {
                   );
                   await Trip.findOneAndUpdate(
                     { phone: data.btn_payload },
-                    { $set: { gotDriver: true, driverId: driver.phone } },
+                    {
+                      $set: {
+                        gotDriver: true,
+                        driverId: driver.phone,
+                        driverPhone: driver.phone,
+                      },
+                    },
                     { new: true, upsert: true }
                   );
                   send_button(
@@ -1018,7 +1174,7 @@ app.post("/webhook", async (req, res) => {
             });
         } else {
           send_message(
-            "The trip has already been accepted by another driver. Better luck next time !!! ",
+            "The trip has already been accepted by another driver or has been cancelled. Better luck next time !!! ",
             data
           );
         }
