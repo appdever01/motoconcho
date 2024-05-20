@@ -263,7 +263,6 @@ app.post("/webhook", async (req, res) => {
         if (validateLocation(data) == true) {
           newTrip.location = [data.lat, data.long];
           needed.location = false;
-          const cad = await caddress(data);
           send_button(
             needed.language == "english"
               ? `Your current location has been received 📍🌍. You're almost set!`
