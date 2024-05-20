@@ -266,8 +266,8 @@ app.post("/webhook", async (req, res) => {
           const cad = await caddress(data);
           send_button(
             needed.language == "english"
-              ? `Your current location has been received 📍🌍. You're almost set! You are currently in ${cad.city}, ${cad.country}.`
-              : `Tu ubicación actual ha sido recibida 📍🌍. ¡Casi listo! Actualmente te encuentras en ${cad.city}, ${cad.country}.`,
+              ? `Your current location has been received 📍🌍. You're almost set!`
+              : `Tu ubicación actual ha sido recibida 📍🌍. ¡Casi listo! `,
             [
               {
                 id: "change_location",
