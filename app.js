@@ -302,7 +302,7 @@ app.post("/webhook", async (req, res) => {
             );
           }
           tem = false;
-
+          needed.doingSomething = false;
           newUser
             .save()
             .then((savedUser) => {
