@@ -227,7 +227,7 @@ const send_driver_template = (lang, data, driver, trip_accepted) => {
           parameters: [
             {
               type: "text",
-              text: driver.fullname,
+              text: `${driver.fullname} -- Ticket Remain: (${driver.ticket})`,
             },
             {
               type: "text",
@@ -477,7 +477,7 @@ const trip_alert = (lang, to, user, trip) => {
             {
               type: "location",
               location: {
-                name: trip.name,
+                name: "Sousa Dominican | MOTOCONCHO",
                 address: trip.address,
                 latitude: lat,
                 longitude: long,

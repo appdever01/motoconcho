@@ -33,20 +33,6 @@ function validateName(data) {
   }
 }
 
-function validateMail(data) {
-  const trimmedEmail = data.msg.trim();
-
-  if (data.type == "text" && !trimmedEmail.includes("@")) {
-    return "Please ensure your email contains an '@' symbol. 📧";
-  } else if (data.type == "text" && !trimmedEmail.includes(".")) {
-    return "Please provide a valid email address, including a domain. For example: test@gmail.com 🌐";
-  } else if (data.type !== "text" || typeof trimmedEmail !== "string") {
-    return "Please provide a valid email address 📧";
-  } else {
-    return true;
-  }
-}
-
 function validateTicket(data) {
   const trimmedTicket = data.msg.trim();
   const ticketRegex = /^(?:100|[1-9]?[0-9])$/; // Regular expression to match numbers from 1 to 100
@@ -63,9 +49,7 @@ function validateTicket(data) {
 function validateAddress(data) {
   const trimmedAddress = data.msg.trim();
 
-  if (data.type == "text" && trimmedAddress.length < 5) {
-    return "Please provide a valid address with at least 5 characters. 🏠";
-  } else if (data.type !== "text" || typeof trimmedAddress !== "string") {
+  if (data.type !== "text" || typeof trimmedAddress !== "string") {
     return "Please provide a valid address. 🏠";
   } else if (!trimmedAddress.includes(" ")) {
     return "Could you please provide your full address, including both your street and city? 🏠";
@@ -105,7 +89,7 @@ function validatePhone(data) {
     return "Please provide a valid phone number with at least 10 digits. 📞";
   } else if (data.type !== "text" || typeof trimmedPhone !== "string") {
     return "Please provide a valid phone number. 📞";
-  } else if (!trimmedPhone.match(/^\+\d{10,14}$/)) {
+  } else if (!trimmedPhone.match(/^\d{10,14}$/)) {
     return "Please provide a valid phone number starting with a country code and containing only numbers. 📞";
   } else {
     return true;
@@ -176,7 +160,6 @@ function delay(ms) {
 module.exports = {
   needed,
   validateName,
-  validateMail,
   validateLocation,
   validateAddress,
   validatePhone,
