@@ -345,13 +345,14 @@ app.post("/webhook", async (req, res) => {
         await delay(3000);
         send_message(
           needed.language == "english"
-            ? "Please provide your destination address !!"
-            : "¡Por favor proporciona la dirección de tu destino!!",
+            ? "Please provide your destination address in text !!"
+            : "Por favor proporciona tu dirección de destino en texto !!",
           data
         );
 
         needed.location = false;
         needed.address = true;
+
         needed.doingSomething = true;
         tripMap.set(data.to, newTrip);
         needsMap.set(data.to, needed);

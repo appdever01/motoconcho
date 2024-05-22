@@ -48,7 +48,7 @@ function validateTicket(data) {
 
 function validateAddress(data) {
   const trimmedAddress = data.msg.trim();
-
+  console.log(data.type);
   if (data.type !== "text" || typeof trimmedAddress !== "string") {
     return "Please provide a valid address. 🏠";
   } else if (!trimmedAddress.includes(" ")) {
@@ -86,7 +86,7 @@ function validatePhone(data) {
   const trimmedPhone = data.msg.trim();
 
   if (data.type == "text" && trimmedPhone.length < 10) {
-    return "Please provide a valid phone number with at least 10 digits. 📞";
+    return "Please provide a valid phone number with at least 10 digits without the plus sign. 📞";
   } else if (data.type !== "text" || typeof trimmedPhone !== "string") {
     return "Please provide a valid phone number. 📞";
   } else if (!trimmedPhone.match(/^\d{10,14}$/)) {
