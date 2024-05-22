@@ -58,6 +58,18 @@ function validateAddress(data) {
   }
 }
 
+function validateDriverAddress(data) {
+  const trimmedAddress = data.msg.trim();
+  console.log(data.type);
+  if (data.type !== "text" || typeof trimmedAddress !== "string") {
+    return "Please provide a valid address. 🏠";
+  } else if (!trimmedAddress.includes(" ")) {
+    return "Could you please provide the driver's full address, including both your street and city? 🏠";
+  } else {
+    return true;
+  }
+}
+
 function validateVehicleName(data) {
   const trimmedVehicleName = data.msg.trim();
 
@@ -161,6 +173,7 @@ module.exports = {
   needed,
   validateName,
   validateLocation,
+  validateDriverAddress,
   validateAddress,
   validatePhone,
   validateLanguage,

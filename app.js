@@ -18,6 +18,7 @@ const {
   validateName,
   validateAddress,
   validateLanguage,
+  validateDriverAddress,
   validateVehicleName,
   validatePic,
   validatePhone,
@@ -398,7 +399,7 @@ app.post("/webhook", async (req, res) => {
         console.log(data.name);
         console.log(data.address);
         if (data.name !== undefined && data.address !== undefined) {
-          newTrip.address = `${data.name}, ${data.address}`;
+          newTrip.address = ` ${data.address}`;
         }
 
         needed.destination = false;
@@ -471,7 +472,7 @@ app.post("/webhook", async (req, res) => {
       }
     }
     if (needed.driver.address && data.msg !== newDriver.phone) {
-      if (validateAddress(data) == true) {
+      if (validateDriverAddress(data) == true) {
         newDriver.address = data.msg;
         needed.driver.address = false;
         needed.driver.language = true;
@@ -482,7 +483,7 @@ app.post("/webhook", async (req, res) => {
         needed.driver.address = true;
         needed.doingSomething = true;
         needsMap.set(data.to, needed);
-        send_message(validateAddress(data), data);
+        send_message(validateDriverAddress(data), data);
       }
     }
     if (needed.driver.language && data.msg !== newDriver.address) {
