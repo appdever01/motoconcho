@@ -8,7 +8,6 @@ const {
   trip_alert,
   send_contact,
   send_driver_template,
-  caddress,
 } = require("./wa_func");
 const mongoose = require("mongoose");
 const app = express();
@@ -113,7 +112,6 @@ app.post("/webhook", async (req, res) => {
   } else {
     let newTrip = new Trip({
       location: [],
-      destination: [],
       address: "",
       gotDriver: false,
       driverId: "",
@@ -133,7 +131,6 @@ app.post("/webhook", async (req, res) => {
     needed = {
       name: false,
       location: false,
-      destination: false,
       welcome: true,
       isDriver: false,
       address: false,
@@ -328,29 +325,13 @@ app.post("/webhook", async (req, res) => {
       if (validateLocation(data) == true) {
         newTrip.location = [data.lat, data.long];
 
-        send_button(
-          needed.language == "english"
-            ? `Your current location has been received 📍🌍. You're almost set!`
-            : `Tu ubicación actual ha sido recibida 📍🌍. ¡Casi listo! `,
-          [
-            {
-              id: "change_location",
-              title:
-                needed.language == "english"
-                  ? "Change location 🌍"
-                  : "Cambiar ubicación 🌍",
-            },
-          ],
-          data
-        );
-        await delay(3000);
         send_message(
           needed.language == "english"
-            ? "Please provide your destination address in text !!"
-            : "Por favor proporciona tu dirección de destino en texto !!",
+            ? `We have received your location! 🌍\n\nPlease tell me where you need to go. For instance:\n\n- I need to visit the Museum in Sosua City\n- I want to explore the Beach`
+            : `¡Hemos recibido tu ubicación! 🌍\n\nPor favor, cuéntanos qué necesitas. Por ejemplo:\n\n- Necesito visitar el Museo en la ciudad de Sosua\n- Quiero explorar la playa`,
+
           data
         );
-
         needed.location = false;
         needed.address = true;
 
@@ -373,15 +354,17 @@ app.post("/webhook", async (req, res) => {
       if (validateAddress(data) == true) {
         newTrip.address = data.msg.trim();
 
-        send_template(
-          "get_dest",
-          "https://i.ibb.co/ng2664M/IMG-20240506-210439.jpg",
-          needed.language == "english" ? "en_US" : "es",
-          data
-        );
+        const msg =
+          needed.language == "english"
+            ? `📍 We have recieve and saved your location.\n\nYou're all set to embark on your exciting journey! 🚀🗺 Will you like to continue? `
+            : `📍 Hemos recibido y guardado tu ubicación.\n\n¡Estás listo para embarcarte en tu emocionante viaje! 🚀🗺 ¿Te gustaría continuar? `;
+
+        tripMap.set(data.to, newTrip);
+        needsMap.set(data.to, needed);
+
+        send_button(msg, dest_confirm, data);
         needed.address = false;
-        needed.destination = true;
-        needed.doingSomething = true;
+        needed.doingSomething = false;
         tripMap.set(data.to, newTrip);
         needsMap.set(data.to, needed);
       } else {
@@ -389,35 +372,6 @@ app.post("/webhook", async (req, res) => {
         needed.doingSomething = true;
         needsMap.set(data.to, needed);
         send_message(validateAddress(data), data);
-      }
-    }
-
-    if (needed.destination && data.type == "location") {
-      console.log(data);
-      if (validateLocation(data) == true) {
-        newTrip.destination = [data.lat, data.long];
-        console.log(data.name);
-        console.log(data.address);
-        if (data.name !== undefined && data.address !== undefined) {
-          newTrip.address = ` ${data.address}`;
-        }
-
-        needed.destination = false;
-        const msg =
-          needed.language == "english"
-            ? `📍 Your destination coordinates have been successfully set to ${newTrip.address}\n\nYou're all set to embark on your exciting journey! 🚀🗺 Get ready to explore new horizons! 🌅🌍`
-            : `📍 Tus coordenadas de destino se han guardado exitosamente en ${newTrip.address}\n\n¡Estás listo para embarcarte en tu emocionante viaje! 🚀🗺 ¡Prepárate para explorar nuevos horizontes! 🌅🌍`;
-
-        tripMap.set(data.to, newTrip);
-        needsMap.set(data.to, needed);
-
-        console.log(msg);
-        send_button(msg, dest_confirm, data);
-      } else {
-        needed.destination = true;
-        needed.doingSomething = true;
-        needsMap.set(data.to, needed);
-        send_message(validateLocation(data), data);
       }
     }
 
@@ -615,7 +569,6 @@ app.post("/webhook", async (req, res) => {
       );
     } else if (data.msg == "/menu") {
       needed.location = false;
-      needed.destination = false;
       needsMap.set(data.to, needed);
       if (isAdmin) {
         send_button(
@@ -766,32 +719,6 @@ app.post("/webhook", async (req, res) => {
           needsMap.set(data.to, needed);
 
           break;
-        case "change_location":
-          needed.location = true;
-          needed.doingSomething = true;
-          needed.destination = false;
-          needsMap.set(data.to, needed);
-          send_template(
-            "send_image",
-            "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",
-            needed.language == "english" ? "en_US" : "es",
-            data
-          );
-
-          break;
-        case "change_destination":
-          needed.location = false;
-          needed.address = true;
-          needed.doingSomething = true;
-          needsMap.set(data.to, needed);
-          send_message(
-            needed.language == "english"
-              ? "Please provide the address of where you are going to ! "
-              : "¡Por favor proporciona la dirección a la que te diriges! ",
-            data
-          );
-
-          break;
         case "create_trip":
           send_template(
             "send_image",
@@ -884,7 +811,6 @@ app.post("/webhook", async (req, res) => {
           break;
         case "cancel_trip":
           needed.location = false;
-          needed.destination = false;
           needsMap.set(data.to, needed);
           Trip.deleteOne({ phone: `${data.to}` }).then((result) => {
             send_button(
@@ -1261,7 +1187,9 @@ app.post("/webhook", async (req, res) => {
             });
         } else {
           send_message(
-            "The trip has already been accepted by another driver or has been cancelled. Better luck next time !!! ",
+            needed.language == "english"
+              ? " The trip has already been accepted by another driver or has been cancelled. Better luck next time !!! "
+              : " El viaje ya ha sido aceptado por otro conductor o ha sido cancelado. ¡Mejor suerte la próxima vez !!! ",
             data
           );
         }

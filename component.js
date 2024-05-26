@@ -3,10 +3,8 @@ const languageButtons = [
   { id: "btn_spa", title: "🇪🇸 Spanish" },
 ];
 const dest_confirm = [
-  { id: "check_driver", title: " Continue  🚗" },
-  { id: "change_destination ", title: " Change destination 🔄" },
-
-  { id: "cancel_trip", title: " Cancel Trip ❎" },
+  { id: "check_driver", title: " Continue " },
+  { id: "cancel_trip", title: " Cancel Trip" },
 ];
 
 const adminBtn = [

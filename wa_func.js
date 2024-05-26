@@ -458,8 +458,8 @@ const mark_read = (data) => {
 
 const trip_alert = (lang, to, user, trip) => {
   const axios = require("axios");
-  const lat = parseFloat(trip.destination[0]).toFixed(4);
-  const long = parseFloat(trip.destination[1]).toFixed(4);
+  const lat = parseFloat(trip.location[0]).toFixed(4);
+  const long = parseFloat(trip.location[1]).toFixed(4);
   let datax = JSON.stringify({
     messaging_product: "whatsapp",
     recipient_type: "individual",
@@ -478,7 +478,7 @@ const trip_alert = (lang, to, user, trip) => {
               type: "location",
               location: {
                 name: "Sousa Dominican | MOTOCONCHO",
-                address: trip.address,
+                address: `${user.fullname} Location !!`,
                 latitude: lat,
                 longitude: long,
               },
@@ -517,17 +517,6 @@ const trip_alert = (lang, to, user, trip) => {
             {
               type: "payload",
               payload: user.phone,
-            },
-          ],
-        },
-        {
-          type: "button",
-          sub_type: "url",
-          index: "2",
-          parameters: [
-            {
-              type: "payload",
-              payload: `${lat}%2C${long}`,
             },
           ],
         },

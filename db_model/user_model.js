@@ -72,10 +72,6 @@ const tripSchema = new mongoose.Schema({
     type: [String],
     required: true,
   },
-  destination: {
-    type: [String],
-    required: true,
-  },
 
   address: {
     type: String,

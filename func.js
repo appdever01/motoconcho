@@ -132,16 +132,16 @@ function validateLanguage(data) {
 
 function validateLocation(data) {
   const sousaDominicanBoundaries = {
-    minLat: 19.6019, // Adjusted latitude boundary by 0.1 degrees
+    minLat: 19.6019,
     maxLat: 19.9019,
-    minLong: -70.6189, // Adjusted longitude boundary by 0.1 degrees
+    minLong: -70.6189,
     maxLong: -70.4189,
   };
 
   // const sousaDominicanBoundaries = {
-  //   minLat: 4.5, // Adjusted latitude boundary by 0.1 degrees
+  //   minLat: 4.5,
   //   maxLat: 13.5,
-  //   minLong: 2.5, // Adjusted longitude boundary by 0.1 degrees
+  //   minLong: 2.5,
   //   maxLong: 14.5,
   // };
 
