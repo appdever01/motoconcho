@@ -1149,6 +1149,15 @@ app.post("/webhook", async (req, res) => {
                     { new: true, upsert: true }
                   );
                   console.log(needed.language);
+
+                  send_image(
+                    driver.vehiclePic,
+                    needed.language == "english"
+                      ? `Driver's Information 👤 📋\n\n👤 Full Name: ${driver.name}\n📱 Phone:  ${driver.phone}\n🗣️ Language:  ${driver.language}\n🏠 Address:  ${driver.address}\n🚗 Vehicle Name:  ${driver.vehicleName}\n🪪 Plate Number:  ${driver.plateNumber}`
+                      : `Información del Conductor 👤 📋\n\n👤 Nombre Completo: ${driver.name}\n📱 Teléfono:  ${driver.phone}\n🗣️ Idioma:  ${driver.language}\n🏠 Dirección:  ${driver.address}\n🚗 Nombre del Vehículo:  ${driver.vehicleName}\n🪪 Número de Placa:  ${driver.plateNumber}`,
+                    { ...data, to: data.btn_payload }
+                  );
+                  await delay(3000);
                   send_button(
                     needed.language == "english"
                       ? "🟢 The driver has accepted your trip! \n\nPlease click on the contact below to chat with the driver. 👋🚕"
