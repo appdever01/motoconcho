@@ -720,6 +720,7 @@ app.post("/webhook", async (req, res) => {
 
           break;
         case "create_trip":
+          console.log("Tripping");
           send_template(
             "send_image",
             "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",

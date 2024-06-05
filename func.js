@@ -132,10 +132,10 @@ function validateLanguage(data) {
 
 function validateLocation(data) {
   const sousaDominicanBoundaries = {
-    minLat: 19.6019,
-    maxLat: 19.9019,
-    minLong: -70.6189,
-    maxLong: -70.4189,
+    minLat: 19.5,
+    maxLat: 20.0,
+    minLong: -71.0,
+    maxLong: -70.0,
   };
 
   // const sousaDominicanBoundaries = {
