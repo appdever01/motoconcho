@@ -181,18 +181,22 @@ app.post("/webhook", async (req, res) => {
             [
               {
                 id: "create_trip",
-                title: needed.language == "english"
-                  ? "Start a trip 🚕"
-                  : "comenzar un viaje",
+                title:
+                  needed.language == "english"
+                    ? "Start a trip 🚕"
+                    : "comenzar un viaje",
               },
-              { id: "trip_history",
-                title: needed.language == "english"
-                  ? "Trip History 📜"
-                  : "historiales de viaje"
-                },
+              {
+                id: "trip_history",
+                title:
+                  needed.language == "english"
+                    ? "Trip History 📜"
+                    : "historiales de viaje",
+              },
               {
                 id: "admin_menu",
-                title: needed.language == "english"
+                title:
+                  needed.language == "english"
                     ? "Admin menu 📋"
                     : "panel de admin",
               },
@@ -239,7 +243,7 @@ app.post("/webhook", async (req, res) => {
       ) {
         send_button(
           getLanguageMessage("chooseLanguage", needed.language),
-          languageButtons,
+          languageButtons(needed.language),
           data
         );
         await delay(3500);
@@ -365,7 +369,7 @@ app.post("/webhook", async (req, res) => {
         tripMap.set(data.to, newTrip);
         needsMap.set(data.to, needed);
 
-        send_button(msg, dest_confirm, data);
+        send_button(msg, dest_confirm(needed.language), data);
         needed.address = false;
         needed.doingSomething = false;
         tripMap.set(data.to, newTrip);
@@ -560,7 +564,7 @@ app.post("/webhook", async (req, res) => {
     if (data.msg == "/change_language") {
       send_button(
         "Hey there! 👋 Could you please choose your language? 🌐",
-        languageButtons,
+        languageButtons(needed.language),
         data
       );
     } else if (data.msg == "/learn_more") {
@@ -578,7 +582,7 @@ app.post("/webhook", async (req, res) => {
           needed.language == "english"
             ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
             : "Hola *Administrador*! 👋 \n\nahora puedes gestionar viajes, usuarios y conductores dentro de la plataforma! \n\n(en las hermosas comunidades de *Sosua* y *Cabarete* en República Dominicana) 🇩🇴🌴🌞",
-            [
+          [
             {
               id: "create_trip",
               title:
@@ -586,19 +590,19 @@ app.post("/webhook", async (req, res) => {
                   ? "Start a trip 🚕"
                   : "comenzar un viaje",
             },
-            { 
+            {
               id: "trip_history",
               title:
                 needed.language == "english"
-                 ? "Trip History 📜"
-                 : "historial de viajes",
+                  ? "Trip History 📜"
+                  : "historial de viajes",
             },
             {
               id: "admin_menu",
               title:
                 needed.language == "english"
-                 ? "Admin menu 📋"
-                 : "panel de admin",
+                  ? "Admin menu 📋"
+                  : "panel de admin",
             },
           ],
 
@@ -887,7 +891,7 @@ app.post("/webhook", async (req, res) => {
             needed.language == "english"
               ? "Hello there! Welcome to the *MOTOCONCHO* Admin Menu 📋!"
               : "¡Hola! ¡Bienvenido al Menú de Administrador de *MOTOCONCHO* 📋!",
-            adminBtn,
+            adminBtn(needed.language),
             data
           );
           break;
