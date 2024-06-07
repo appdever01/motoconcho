@@ -177,21 +177,24 @@ app.post("/webhook", async (req, res) => {
           send_button(
             needed.language == "english"
               ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
-              : "¡Hola *Administrador de MOTOCONCHO*! 🚀🌍 ¡Ahora puedes gestionar viajes, usuarios y conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞",
+              : "Hola *Administrador*! 👋 \n\nahora puedes gestionar viajes, usuarios y conductores dentro de la plataforma! \n\n(en las hermosas comunidades de *Sosua* y *Cabarete* en República Dominicana) 🇩🇴🌴🌞",
             [
               {
                 id: "create_trip",
-                title: needed.language
+                title: needed.language == "english"
                   ? "Start a trip 🚕"
-                  : "Comenzar un viaje 🚕",
+                  : "comenzar un viaje",
               },
-              { id: "trip_history", title: "Trip History 📜" },
+              { id: "trip_history",
+                title: needed.language == "english"
+                  ? "Trip History 📜"
+                  : "historiales de viaje"
+                },
               {
                 id: "admin_menu",
-                title:
-                  needed.language == "english"
+                title: needed.language == "english"
                     ? "Admin menu 📋"
-                    : "Admin menu 📋",
+                    : "panel de admin",
               },
             ],
 
@@ -268,7 +271,7 @@ app.post("/webhook", async (req, res) => {
                   title:
                     needed.language == "english"
                       ? "Start a trip 🚕"
-                      : "Comenzar un viaje 🚕",
+                      : "Comenzar un",
                 },
                 { id: "trip_history", title: "Trip History 📜" },
                 {
@@ -328,7 +331,7 @@ app.post("/webhook", async (req, res) => {
         send_message(
           needed.language == "english"
             ? `We have received your location! 🌍\n\nPlease tell me where you need to go. For instance:\n\n- I need to visit the Museum in Sosua City\n- I want to explore the Beach`
-            : `¡Hemos recibido tu ubicación! 🌍\n\nPor favor, cuéntanos qué necesitas. Por ejemplo:\n\n- Necesito visitar el Museo en la ciudad de Sosua\n- Quiero explorar la playa`,
+            : `hemos recibido tu ubicación! 📍\n\nahora, por favor, cuéntanos qué necesitas... por ejemplo:\n\n- necesito una comida de tal restaurante...\n- quiero ir a la playa...`,
 
           data
         );
@@ -357,7 +360,7 @@ app.post("/webhook", async (req, res) => {
         const msg =
           needed.language == "english"
             ? `📍 We have recieve and saved your location.\n\nYou're all set to embark on your exciting journey! 🚀🗺 Will you like to continue? `
-            : `📍 Hemos recibido y guardado tu ubicación.\n\n¡Estás listo para embarcarte en tu emocionante viaje! 🚀🗺 ¿Te gustaría continuar? `;
+            : `perfecto, hemos recibido y guardado tu informacion. 💾\n\nestás listo para comenzar tu viaje?`;
 
         tripMap.set(data.to, newTrip);
         needsMap.set(data.to, needed);
@@ -574,19 +577,28 @@ app.post("/webhook", async (req, res) => {
         send_button(
           needed.language == "english"
             ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
-            : "¡Hola *Administrador de MOTOCONCHO*! 🚀🌍 ¡Ahora puedes gestionar viajes, usuarios y conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞",
-          [
+            : "Hola *Administrador*! 👋 \n\nahora puedes gestionar viajes, usuarios y conductores dentro de la plataforma! \n\n(en las hermosas comunidades de *Sosua* y *Cabarete* en República Dominicana) 🇩🇴🌴🌞",
+            [
             {
               id: "create_trip",
               title:
                 needed.language == "english"
                   ? "Start a trip 🚕"
-                  : "Comenzar un viaje 🚕",
+                  : "comenzar un viaje",
             },
-            { id: "trip_history", title: "Trip History 📜" },
+            { 
+              id: "trip_history",
+              title:
+                needed.language == "english"
+                 ? "Trip History 📜"
+                 : "historial de viajes",
+            },
             {
               id: "admin_menu",
-              title: needed.language ? "Admin menu 📋" : "Admin menu 📋",
+              title:
+                needed.language == "english"
+                 ? "Admin menu 📋"
+                 : "panel de admin",
             },
           ],
 
