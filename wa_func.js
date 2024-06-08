@@ -8,6 +8,9 @@ const send_button = (message, btn_list, data) => {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: data.to,
+    context: {
+      message_id: data.wam_id,
+    },
     type: "interactive",
     interactive: {
       type: "button",
@@ -86,6 +89,9 @@ const send_template = (template_name, media_url, lang, data) => {
     messaging_product: "whatsapp",
     type: "template",
     to: data.to,
+    context: {
+      message_id: data.wam_id,
+    },
     template: {
       name: template_name,
       language: {
@@ -398,6 +404,9 @@ const send_image = (caption, id, data) => {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: data.to,
+    context: {
+      message_id: data.wam_id,
+    },
     type: "image",
     image: {
       id: id,
