@@ -810,7 +810,8 @@ app.post("/webhook", async (req, res) => {
                         : "es",
                       driver.phone,
                       newUser,
-                      newTrip
+                      newTrip,
+                      data
                     );
                     await delay(3000);
                   }
@@ -1054,7 +1055,8 @@ app.post("/webhook", async (req, res) => {
           data.btn_id.replace("confirm_", ""),
           usr.fullname,
           data.wa_id,
-          data.wa_id
+          data.wa_id,
+          data
         );
       } else if (data.btn_id.startsWith("ban_")) {
         const phn = data.btn_id.replace("ban_", "");
