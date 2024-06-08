@@ -139,6 +139,9 @@ const send_location_template = (lang, data, address) => {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: data.to,
+    context: {
+      message_id: data.wam_id,
+    },
     type: "template",
     template: {
       name: "location_confirm",
@@ -210,6 +213,9 @@ const send_driver_template = (lang, data, driver, trip_accepted) => {
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: data.to,
+    context: {
+      message_id: data.wam_id,
+    },
     type: "template",
     template: {
       name: "send_driverr",
@@ -319,6 +325,9 @@ const send_driver_alert = (lang, data, driver) => {
   let datax = JSON.stringify({
     messaging_product: "whatsapp",
     recipient_type: "individual",
+    context: {
+      message_id: data.wam_id,
+    },
     to: data.to,
     type: "template",
     template: {
@@ -472,6 +481,9 @@ const trip_alert = (lang, to, user, trip) => {
   let datax = JSON.stringify({
     messaging_product: "whatsapp",
     recipient_type: "individual",
+    context: {
+      message_id: data.wam_id,
+    },
     to: to,
     type: "template",
     template: {
@@ -560,6 +572,9 @@ const send_contact = (to, fullname, number, id) => {
   let datax = JSON.stringify({
     messaging_product: "whatsapp",
     to: to,
+    context: {
+      message_id: data.wam_id,
+    },
     type: "contacts",
     contacts: [
       {
