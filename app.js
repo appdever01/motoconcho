@@ -740,7 +740,7 @@ app.post("/webhook", async (req, res) => {
           send_image(
             needed.language == "english"
               ? "to connect with the drivers and make your trip easier, we need your current location… 📍\n\nfollow the steps in the image i sent you!"
-              : "tara conectarte con los motoconcho y hacer tu viaje más fácil, necesitamos tu ubicación actual… 📍\n\nsigue los pasos en la imagen que te he enviado!",
+              : "para conectarte con los motoconcho y hacer tu viaje más fácil, necesitamos tu ubicación actual… 📍\n\nsigue los pasos en la imagen que te he enviado!",
             "1547748582764664",
             data
           );
@@ -760,7 +760,7 @@ app.post("/webhook", async (req, res) => {
             send_message(
               needed.language == "english"
                 ? "Your trip information has been sent to all our available drivers. Please wait for one of them to accept the trip. Feel free to alert any driver you like! 🚗📣 Once they accept your trip, I'll notify you right away! 📩"
-                : "Tu información de viaje ha sido enviada a todos nuestros conductores disponibles. Por favor, espera a que uno de ellos acepte el viaje. ¡Siéntete libre de alertar a cualquier conductor que desees! 🚗📣 Una vez que acepten tu viaje, ¡te notificaré de inmediato! 📩",
+                : "tu información de viaje ha sido enviada a todos nuestros motoconcho disponibles! 📩\n\npor favor, espera a que uno de ellos acepte el viaje y una vez que acepten tu viaje te notificaré de inmediato.",
               data
             );
             await delay(2000);
@@ -805,7 +805,7 @@ app.post("/webhook", async (req, res) => {
                   send_message(
                     needed.language == "english"
                       ? "No drivers found at the moment. Please try again later."
-                      : "No se encontraron conductores en este momento. Por favor, inténtalo de nuevo más tarde.",
+                      : "no se encontraron motoconcho disponibles en este momento! ❌\n\npor favor, inténtalo de nuevo más tarde.",
                     data
                   );
                 } else {
