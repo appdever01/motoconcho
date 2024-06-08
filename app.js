@@ -739,8 +739,8 @@ app.post("/webhook", async (req, res) => {
           console.log("Tripping");
           send_image(
             needed.language == "english"
-              ? "To connect with the drivers and make your trip easier, we need your current location… 📍\n\nFollow the steps in the image i sent you!"
-              : "Para conectarte con los motoconcho y hacer tu viaje más fácil, necesitamos tu ubicación actual… 📍\n\nSigue los pasos en la imagen que te he enviado!",
+              ? "to connect with the drivers and make your trip easier, we need your current location… 📍\n\nfollow the steps in the image i sent you!"
+              : "tara conectarte con los motoconcho y hacer tu viaje más fácil, necesitamos tu ubicación actual… 📍\n\nsigue los pasos en la imagen que te he enviado!",
             "1547748582764664",
             data
           );
