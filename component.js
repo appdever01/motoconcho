@@ -38,4 +38,4 @@ const adminBtn = (language) => {
     },
   ];
 };
-module.exports = { languageButtons, dest_confirm, adminBtn(needed.language) };
+module.exports = { languageButtons, dest_confirm, adminBtn };

@@ -737,12 +737,14 @@ app.post("/webhook", async (req, res) => {
           break;
         case "create_trip":
           console.log("Tripping");
-          send_template(
-            "send_image",
-            "https://i.ibb.co/fqpf87k/IMG-20240506-210512.jpg",
-            needed.language == "english" ? "en_US" : "es",
+          send_image(
+            needed.language == "english"
+              ? "Hey there! 👋🙃 To connect you with drivers and make your journey smoother, we need your current location. 📍\n\nSimply follow the steps in the image I've sent. Let's get you on the road with ease! 🚀🗺"
+              : "¡Hola! 👋🙃 Para conectarte con los conductores y hacer tu viaje más fácil, necesitamos tu ubicación actual. 📍\n\nSimplemente sigue los pasos en la imagen que te he enviado. ¡Vamos a ponerte en la carretera con facilidad! 🚀🗺",
+            "1547748582764664",
             data
           );
+
           needed.location = true;
           needed.doingSomething = true;
           userMap.set(data.to, newUser);
