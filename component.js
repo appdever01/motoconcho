@@ -4,7 +4,11 @@ const languageButtons = (language) => {
   return [
     {
       id: "btn_eng",
-      title: language == "english" ? "🇬🇧 English" : "🇪🇸 Spanish",
+      title: "🇺🇸 English",
+    },
+    {
+      id: "btn_spa",
+      title: "🇪🇸 Spanish",
     },
   ];
 };
