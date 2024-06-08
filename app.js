@@ -763,13 +763,7 @@ app.post("/webhook", async (req, res) => {
                 : "tu información de viaje ha sido enviada a todos nuestros motoconcho disponibles! 📩\n\npor favor, espera a que uno de ellos acepte el viaje y una vez que acepten tu viaje te notificaré de inmediato.",
               data
             );
-            await delay(2000);
-            send_message(
-              needed.language == "english"
-                ? "🚨 Trip Alert! 🚨\n\nPlease ensure that the driver details match and that they have the required jacket. Remember:\n\n- Trips cannot cost more than RD$500 ($10) 💸\n- For any delivery, do not give more than RD$1000 ($20) 💰\n\n*MOTOCONCHO © 2024*"
-                : "🚨 ¡Alerta de Viaje! 🚨\n\nPor favor asegúrate de que los detalles del conductor coincidan y que tengan la chaqueta requerida. Recuerda:\n\n- Los viajes no pueden costar más de RD$500 ($10) 💸\n- Para cualquier entrega, no des más de RD$1000 ($20) 💰\n\n*MOTOCONCHO © 2024*",
-              data
-            );
+
             needed.doingSomething = false;
             needsMap.set(data.to, needed);
             // Check if gotDriver didn't change to true after 10 minutes and delete the trip if needed
@@ -1187,6 +1181,13 @@ app.post("/webhook", async (req, res) => {
                         title: "Confirm ✅",
                       },
                     ],
+                    { ...data, to: data.btn_payload }
+                  );
+                  await delay(2000);
+                  send_message(
+                    needed.language == "english"
+                      ? "🚨 Trip Alert! 🚨\n\nPlease ensure that the driver details match and that they have the required jacket. Remember:\n\n- Trips cannot cost more than RD$500 ($10) 💸\n- For any delivery, do not give more than RD$1000 ($20) 💰\n\n*MOTOCONCHO © 2024*"
+                      : "🚨 ¡Alerta de Viaje! 🚨\n\nPor favor asegúrate de que los detalles del conductor coincidan y que tengan la chaqueta requerida. Recuerda:\n\n- Los viajes no pueden costar más de RD$500 ($10) 💸\n- Para cualquier entrega, no des más de RD$1000 ($20) 💰\n\n*MOTOCONCHO © 2024*",
                     { ...data, to: data.btn_payload }
                   );
                   send_message(
