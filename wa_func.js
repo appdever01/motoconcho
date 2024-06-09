@@ -487,9 +487,9 @@ const trip_alert = (lang, to, user, trip,data) => {
     to: to,
     type: "template",
     template: {
-      name: "trip_alert",
+      name: "trip_send",
       language: {
-        code: lang ?? "en_US",
+        code: lang ?? "es",
       },
       components: [
         {
@@ -498,8 +498,8 @@ const trip_alert = (lang, to, user, trip,data) => {
             {
               type: "location",
               location: {
-                name: "Sousa Dominican | MOTOCONCHO",
-                address: `${user.fullname} Location !!`,
+                name: "motoconcho.bot",
+                address: `ubicación de ${user.fullname}...`,
                 latitude: lat,
                 longitude: long,
               },

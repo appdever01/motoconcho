@@ -212,17 +212,26 @@ app.post("/webhook", async (req, res) => {
                 : `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to *MOTOCONCHO*. 📧👍 Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
               : needed.isDriver
               ? `¡Hola *${newUser.fullname}*! 🚀🌍 \n\nBienvenido de nuevo a *MOTOCONCHO*. Tienes ${driverFound.ticket} boleto(s) restante(s). Siéntete libre de comenzar o gestionar tus viajes y explorar opciones de conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞`
-              : `¡Hola *${newUser.fullname}*! 🚀🌍 \n\nBienvenido de nuevo a *MOTOCONCHO*. Siéntete libre de comenzar o gestionar tus viajes y explorar opciones de conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞`,
+              : `hola *${newUser.fullname}*, bienvenido nuevamente en nuestra plataforma! 👋\n\nahora puede comenzar a gestionar tus viajes y explorar nuevas opciones... \n\n> por favor, recuerde que solo atendemos el area de Sosua y Cabarete.`,
             needed.isDriver
               ? [{ id: "trip_history", title: "Trip History 📜" }]
               : [
                   {
                     id: "create_trip",
-                    title: needed.language
+                    title: needed.language == "english"
                       ? "Start a trip 🚕"
-                      : "Comenzar un viaje 🚕",
+                      : "comenzar un viaje",
                   },
-                  { id: "trip_history", title: "Trip History 📜" },
+                  { id: "trip_history",
+                  title: needed.language == "english"
+                      ? "Trip History 📜"
+                      : "historiales de viaje",
+                  },
+                  { id: "" /*button id for lang*/,
+                  title: needed.language == "english"
+                      ? "change language"
+                      : "cambiar idioma"
+                  },
                 ],
 
             data
@@ -335,7 +344,7 @@ app.post("/webhook", async (req, res) => {
         send_message(
           needed.language == "english"
             ? `We have received your location! 🌍\n\nPlease tell me where you need to go. For instance:\n\n- I need to visit the Museum in Sosua City\n- I want to explore the Beach`
-            : `hemos recibido tu ubicación! 📍\n\nahora, por favor, cuéntanos qué necesitas... por ejemplo:\n\n- necesito una comida de tal restaurante...\n- quiero ir a la playa...`,
+            : `hemos recibido tu ubicación! 📍\n\nahora cuéntanos qué necesitas, por ejemplo:\n\n- necesito una comida de tal restaurante...\n\n- quiero ir a la playa...`,
 
           data
         );
@@ -578,6 +587,7 @@ app.post("/webhook", async (req, res) => {
       needed.location = false;
       needsMap.set(data.to, needed);
       if (isAdmin) {
+        console.log(needed.language)
         send_button(
           needed.language == "english"
             ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
@@ -665,6 +675,14 @@ app.post("/webhook", async (req, res) => {
         case "btn_eng":
           newUser.language = "english";
           needed.language = "english";
+          if (user) {
+            const updatedDocument = await User.findOneAndUpdate(
+              { phone: data.to },
+              { $set: { language: 'english' } },
+              { new: true, upsert: true }
+            );
+          }
+
           send_message("Your language has been set to English 🇬🇧", data);
           await delay(3000);
           console.log(data.type);
@@ -703,6 +721,14 @@ app.post("/webhook", async (req, res) => {
           newUser.language = "spanish";
           needed.language = "spanish";
           needsMap.set(data.to, needed);
+          if (user) {
+            const updatedDocument = await User.findOneAndUpdate(
+              { phone: data.to },
+              { $set: { language: 'spanish' } },
+              { new: true, upsert: true }
+            );
+           
+          }
           send_message("Tu idioma se ha establecido en español 🇪🇸", data);
           await delay(3000);
           if (
@@ -740,7 +766,7 @@ app.post("/webhook", async (req, res) => {
           send_image(
             needed.language == "english"
               ? "to connect with the drivers and make your trip easier, we need your current location… 📍\n\nfollow the steps in the image i sent you!"
-              : "para conectarte con los motoconcho y hacer tu viaje más fácil, necesitamos tu ubicación actual… 📍\n\nsigue los pasos en la imagen que te he enviado!",
+              : "para conectarte con los motoconcho y hacer tu viaje más fácil, necesitamos tu ubicación actual… 📍\n\n> por favor, sigue los pasos en la imagen que te he enviado!",
             "1547748582764664",
             data
           );
@@ -760,7 +786,7 @@ app.post("/webhook", async (req, res) => {
             send_message(
               needed.language == "english"
                 ? "Your trip information has been sent to all our available drivers. Please wait for one of them to accept the trip. Feel free to alert any driver you like! 🚗📣 Once they accept your trip, I'll notify you right away! 📩"
-                : "tu información de viaje ha sido enviada a todos nuestros motoconcho disponibles! 📩\n\npor favor, espera a que uno de ellos acepte el viaje y una vez que acepten tu viaje te notificaré de inmediato.",
+                : "tu información de viaje ha sido enviada a todos nuestros motoconcho disponibles! 📩\n\n> por favor, espera a que uno de ellos acepte el viaje y una vez que acepten tu viaje te notificaré de inmediato.",
               data
             );
 
@@ -780,10 +806,10 @@ app.post("/webhook", async (req, res) => {
                       send_button(
                         needed.language == "english"
                           ? "🚨 Trip Alert! 🚨\n\nYour trip has been automatically cancelled as no drivers accepted it within 10 minutes. Please start a new trip."
-                          : "🚨 ¡Alerta de Viaje! 🚨\n\nTu viaje ha sido cancelado automáticamente ya que ningún conductor lo aceptó en 10 minutos. Por favor, inicia un nuevo viaje. ",
+                          : "tu viaje ha sido cancelado automáticamente ya que ningún conductor lo aceptó en 5 minutos... ❌\n\n> por favor, intentalo de nuevo.",
                         [
-                          { id: "create_trip", title: "Start a new trip 🚕" },
-                          { id: "trip_history", title: "Trip History 📜" },
+                          { id: "create_trip", title: needed.language == "english" ? "Start a new trip 🚕" : "comenzar un viaje"},
+                          { id: "trip_history", title: needed.language == "english" ? "Trip History 📜" : "historiales de viaje"},
                         ],
                         data
                       );
@@ -876,8 +902,9 @@ app.post("/webhook", async (req, res) => {
               send_button(
                 needed.language == "english"
                   ? "*You haven't created any trips before !!!* 🚫"
-                  : "*¡No has creado ningún viaje antes!!!* 🚫",
-                [{ id: "create_trip", title: "Start a new trip 🚕" }],
+                  : "no has creado ningún viaje antes!",
+                  //we need to make the button for spanish
+                [{ id: "create_trip", title: needed.language =='english'  ? "Start a new trip 🚕"  : "comenza un nuevo"}],
                 data
               );
             }
@@ -1126,10 +1153,21 @@ app.post("/webhook", async (req, res) => {
 
           break;
 
+          case "Agregar boleto":
+          send_message(
+            "How many trip ticket did you want to add for this driver ?",
+            data
+          );
+          needTicket = true;
+          needed.doingSomething = true;
+          wTicket = data.btn_payload;
+
+          break;
+
         default:
           break;
       }
-      if (data.btn_text == "Accept Trip" || data.btn_text == "Aceptar viaje") {
+      if (data.btn_text == "accept" || data.btn_text == "aceptar") {
         console.log("trippinggg");
         console.log(data.btn_payload);
         needed.welcome = false;
@@ -1176,11 +1214,12 @@ app.post("/webhook", async (req, res) => {
                   send_button(
                     needed.language == "english"
                       ? "🟢 The driver has accepted your trip! \n\nPlease click on the contact below to chat with the driver. 👋🚕"
-                      : "🟢 ¡El conductor ha aceptado tu viaje! \n\nPor favor, haz clic en el contacto a continuación para chatear con el conductor. 👋🚕",
+                      : "un motoconcho ha aceptado tu viaje! ✔\n\n> por favor, pulsa el boton para empezar a chatear con el.",
                     [
                       {
                         id: `confirm_${data.wa_id}`,
-                        title: "Confirm ✅",
+                        //we need to make this in spanish
+                        title:  needed.language =='english'  ? "confirm ✅" : "confirma ✅",
                       },
                     ],
                     { ...data, to: data.btn_payload }
@@ -1189,7 +1228,7 @@ app.post("/webhook", async (req, res) => {
                   send_message(
                     needed.language == "english"
                       ? "🚨 Trip Alert! 🚨\n\nPlease ensure that the driver details match and that they have the required jacket. Remember:\n\n- Trips cannot cost more than RD$500 ($10) 💸\n- For any delivery, do not give more than RD$1000 ($20) 💰\n\n*MOTOCONCHO © 2024*"
-                      : "🚨 ¡Alerta de Viaje! 🚨\n\nPor favor asegúrate de que los detalles del conductor coincidan y que tengan la chaqueta requerida. Recuerda:\n\n- Los viajes no pueden costar más de RD$500 ($10) 💸\n- Para cualquier entrega, no des más de RD$1000 ($20) 💰\n\n*MOTOCONCHO © 2024*",
+                      : "alerta de viaje! 🚨\n\nasegúrate de que los detalles del motoconcho coincidan, que tengan la chaqueta requerida y recuerda:\n\n- los viajes no pueden costar más de RD$500 ($10)\n\n- para cualquier delivery, no des más de RD$1000 ($20)",
                     { ...data, to: data.btn_payload }
                   );
                   send_message(
@@ -1206,8 +1245,10 @@ app.post("/webhook", async (req, res) => {
                     data.wa_id
                   );
                 } else {
+                  //we need to make this in spanish
                   send_message(
-                    "You did not have enough ticket to accept this trip. Contact the admin to purchase ticket! ",
+                    needed.language =='english'  ? "You did not have enough ticket to accept this trip. Contact the admin to purchase ticket! " :
+                    "Spanish version here",
                     data
                   );
                 }
@@ -1225,8 +1266,8 @@ app.post("/webhook", async (req, res) => {
           );
         }
       } else if (
-        data.btn_text == "Reject Trip" ||
-        data.btn_text == "Rechazar viaje"
+        data.btn_text == "decline" ||
+        data.btn_text == "rechazar"
       ) {
         needed.welcome = false;
         needsMap.set(data.to, needed);
