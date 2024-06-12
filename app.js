@@ -1327,7 +1327,7 @@ app.post("/webhook", async (req, res) => {
 
                   await delay(3000);
                   send_contact({ ...data, to: data.btn_payload });
-                  send_contact(data);
+                  send_contact({ ...data, wa_id: data.btn_payload });
                 } else {
                   send_message(
                     needed.language == "english"
