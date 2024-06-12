@@ -114,6 +114,7 @@ app.post("/webhook", async (req, res) => {
       location: [],
       address: "",
       gotDriver: false,
+      isFinished: false,
       driverId: "",
       phone: "",
       driverPhone: "",
@@ -1225,19 +1226,20 @@ app.post("/webhook", async (req, res) => {
                   );
                   console.log(needed.language);
 
-                  send_image(
-                    driver.vehiclePic,
-                    needed.language == "english"
-                      ? `Driver's Information 👤 📋\n\n👤 Full Name: ${driver.name}\n📱 Phone:  ${driver.phone}\n🗣️ Language:  ${driver.language}\n🏠 Address:  ${driver.address}\n🚗 Vehicle Name:  ${driver.vehicleName}\n🪪 Plate Number:  ${driver.plateNumber}`
-                      : `Información del Conductor 👤 📋\n\n👤 Nombre Completo: ${driver.name}\n📱 Teléfono:  ${driver.phone}\n🗣️ Idioma:  ${driver.language}\n🏠 Dirección:  ${driver.address}\n🚗 Nombre del Vehículo:  ${driver.vehicleName}\n🪪 Número de Placa:  ${driver.plateNumber}`,
-                    { ...data, to: data.btn_payload }
-                  );
-                  await delay(3000);
                   send_message(
                     needed.language == "english"
                       ? "🟢 The driver has accepted your trip! 🚕"
                       : "un motoconcho ha aceptado tu viaje! ✔",
 
+                    { ...data, to: data.btn_payload }
+                  );
+                  await delay(3000);
+
+                  send_image(
+                    driver.vehiclePic,
+                    needed.language == "english"
+                      ? `Driver's Information 👤 📋\n\n👤 Full Name: ${driver.name}\n📱 Phone:  ${driver.phone}\n🗣️ Language:  ${driver.language}\n🏠 Address:  ${driver.address}\n🚗 Vehicle Name:  ${driver.vehicleName}\n🪪 Plate Number:  ${driver.plateNumber}`
+                      : `Información del Conductor 👤 📋\n\n👤 Nombre Completo: ${driver.name}\n📱 Teléfono:  ${driver.phone}\n🗣️ Idioma:  ${driver.language}\n🏠 Dirección:  ${driver.address}\n🚗 Nombre del Vehículo:  ${driver.vehicleName}\n🪪 Número de Placa:  ${driver.plateNumber}`,
                     { ...data, to: data.btn_payload }
                   );
                   await delay(2000);
@@ -1249,10 +1251,80 @@ app.post("/webhook", async (req, res) => {
                   );
                   send_message(
                     needed.language == "english"
-                      ? "🟢 You have successfully accepted the trip. 👋🚕\n\nOnce the user confirm you as the driver, you will receive thier contact. You can wait for it 🔰"
-                      : "🟢 Has aceptado el viaje exitosamente. 👋🚕\n\nUna vez que el usuario te confirme como conductor, recibirás su contacto. Puedes esperarlo 🔰",
+                      ? "🟢 You have successfully accepted the trip. 👋🚕"
+                      : "🟢 Has aceptado el viaje exitosamente. 👋🚕",
                     data
                   );
+
+                  needed.doingSomething = true;
+
+                  setTimeout(async () => {
+                    send_button(
+                      needed.language == "english"
+                        ? "🕒 30 minutes have passed since the trip started. Are you done with the trip?"
+                        : "🕒 Han pasado 30 minutos desde que comenzó el viaje. ¿Has terminado el viaje?",
+                      [
+                        {
+                          id: "yes_done",
+                          title: needed.language == "english" ? "Yes" : "Sí",
+                        },
+                        {
+                          id: "no_continue",
+                          title: needed.language == "english" ? "No" : "No",
+                        },
+                      ],
+                      { ...data, to: data.btn_payload }
+                    );
+                    send_button(
+                      needed.language == "english"
+                        ? "🕒 30 minutes into the trip. Is everything on track and the passenger comfortable?"
+                        : "🕒 30 minutos de viaje. ¿Está todo en orden y el pasajero cómodo?",
+                      [
+                        {
+                          id: "yes_done",
+                          title: needed.language == "english" ? "Yes" : "Sí",
+                        },
+                        {
+                          id: "no_continue",
+                          title: needed.language == "english" ? "No" : "No",
+                        },
+                      ],
+                      data
+                    );
+                  }, 1800000);
+
+                  if (data.type == "interactive") {
+                    if (data.btn_id === "yes_done") {
+                      needed.doingSomething = false;
+                      Trip.findOneAndUpdate(
+                        { phone: data.to },
+                        { $set: { isFinished: true } },
+                        { new: true },
+                        (err, updatedTrip) => {
+                          if (err) {
+                            console.error("Error updating trip status:", err);
+                          } else {
+                            console.log(updatedTrip);
+                            send_message(
+                              needed.language == "english"
+                                ? "🏁 Trip has been marked as finished. Thank you!"
+                                : "🏁 El viaje ha sido marcado como terminado. ¡Gracias!",
+                              data
+                            );
+                          }
+                        }
+                      );
+                    } else if (data.btn_id === "no_continue") {
+                      needed.doingSomething = true;
+                      send_message(
+                        needed.language == "english"
+                          ? "🔄 Continuing the trip. Please stay safe!"
+                          : "🔄 Continuando el viaje. ¡Por favor mantente seguro!",
+                        data
+                      );
+                    }
+                  }
+
                   await delay(3000);
                   send_contact({ ...data, to: data.btn_payload });
                   send_contact(data);
