@@ -474,7 +474,7 @@ const mark_read = (data) => {
     });
 };
 
-const trip_alert = (lang, to, user, trip,data) => {
+const trip_alert = (lang, to, user, trip, data) => {
   const axios = require("axios");
   const lat = parseFloat(trip.location[0]).toFixed(4);
   const long = parseFloat(trip.location[1]).toFixed(4);
@@ -567,24 +567,24 @@ const trip_alert = (lang, to, user, trip,data) => {
     });
 };
 
-const send_contact = (to, fullname, number, id,data) => {
+const send_contact = (data) => {
   const axios = require("axios");
   let datax = JSON.stringify({
     messaging_product: "whatsapp",
-    to: to,
-   
+    to: data.to,
+
     type: "contacts",
     contacts: [
       {
         name: {
-          formatted_name: fullname,
-          first_name: fullname.split(" ")[0],
+          formatted_name: data.username,
+          first_name: data.username.split(" ")[0],
         },
         phones: [
           {
-            phone: number,
+            phone: data.wa_id,
             type: "WORK",
-            wa_id: id,
+            wa_id: data.wa_id,
           },
         ],
       },
