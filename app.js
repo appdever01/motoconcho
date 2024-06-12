@@ -1327,8 +1327,9 @@ app.post("/webhook", async (req, res) => {
 
                   await delay(3000);
                   const userx = await User.findOne({ phone: data.btn_payload });
+                  let usernamex = "";
                   if (userx) {
-                    const userNamex = userx.fullname;
+                    usernamex = userx.fullname;
                     console.log(`User name: ${userNamex}`);
                   } else {
                     console.error("User not found");
