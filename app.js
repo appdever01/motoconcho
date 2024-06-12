@@ -231,7 +231,7 @@ app.post("/webhook", async (req, res) => {
                         : "historiales de viaje",
                   },
                   {
-                    id: "" /*button id for lang*/,
+                    id: "cambiar_idioma" /*button id for lang*/,
                     title:
                       needed.language == "english"
                         ? "change language"
@@ -684,6 +684,13 @@ app.post("/webhook", async (req, res) => {
             data
           );
           break;
+        case "cambiar_idioma":
+          send_button(
+            "Hey there! 👋 Could you please choose your language? 🌐",
+            languageButtons(needed.language),
+            data
+          );
+
         case "btn_eng":
           newUser.language = "english";
           needed.language = "english";
