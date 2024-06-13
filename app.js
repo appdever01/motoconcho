@@ -1296,6 +1296,7 @@ app.post("/webhook", async (req, res) => {
                   if (data.type == "interactive") {
                     if (data.btn_id === "yes_done") {
                       needed.doingSomething = false;
+                      needsMap.set(data.to, needed);
                       Trip.findOneAndUpdate(
                         { phone: data.to },
                         { $set: { isFinished: true } },
@@ -1316,6 +1317,7 @@ app.post("/webhook", async (req, res) => {
                       );
                     } else if (data.btn_id === "no_continue") {
                       needed.doingSomething = true;
+                      needsMap.set(data.to, needed);
                       send_message(
                         needed.language == "english"
                           ? "🔄 Continuing the trip. Please stay safe!"
@@ -1379,6 +1381,8 @@ app.post("/webhook", async (req, res) => {
             : `🟢 Has agregado exitosamente ${data.msg} boletos de viaje para ${updatedDocument.phone}`,
           data
         );
+        needed.doingSomething = false;
+        needsMap.set(data.to, needed);
       } else {
         send_message(validateTicket(data), data);
         needTicket = true;
