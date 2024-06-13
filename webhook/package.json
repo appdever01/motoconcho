@@ -1,0 +1,20 @@
+{
+  "name": "Motoconcho Bot",
+  "version": "1.0.0",
+  "description": "AMotoconcho Webhook",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "WhatsApp",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1",
+    "request": "^2.88.2"
+  },
+  "engines": {
+    "node": "12.x"
+  }
+}

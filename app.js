@@ -740,7 +740,7 @@ app.post("/webhook", async (req, res) => {
           send_image(
             needed.language == "english"
               ? "to connect with the drivers and make your trip easier, we need your current location… 📍\n\nfollow the steps in the image i sent you!"
-              : "para conectarte con los motoconcho y hacer tu viaje más fácil, necesitamos tu ubicación actual… 📍\n\nsigue los pasos en la imagen que te he enviado!",
+              : "tara conectarte con los motoconcho y hacer tu viaje más fácil, necesitamos tu ubicación actual… 📍\n\nsigue los pasos en la imagen que te he enviado!",
             "1547748582764664",
             data
           );
@@ -760,7 +760,7 @@ app.post("/webhook", async (req, res) => {
             send_message(
               needed.language == "english"
                 ? "Your trip information has been sent to all our available drivers. Please wait for one of them to accept the trip. Feel free to alert any driver you like! 🚗📣 Once they accept your trip, I'll notify you right away! 📩"
-                : "tu información de viaje ha sido enviada a todos nuestros motoconcho disponibles! 📩\n\npor favor, espera a que uno de ellos acepte el viaje y una vez que acepten tu viaje te notificaré de inmediato.",
+                : "Tu información de viaje ha sido enviada a todos nuestros conductores disponibles. Por favor, espera a que uno de ellos acepte el viaje. ¡Siéntete libre de alertar a cualquier conductor que desees! 🚗📣 Una vez que acepten tu viaje, ¡te notificaré de inmediato! 📩",
               data
             );
 
@@ -791,7 +791,7 @@ app.post("/webhook", async (req, res) => {
                   }
                 }
               );
-            }, 240000);
+            }, 360000);
 
             Driver.find({})
               .then(async (drivers) => {
@@ -799,7 +799,7 @@ app.post("/webhook", async (req, res) => {
                   send_message(
                     needed.language == "english"
                       ? "No drivers found at the moment. Please try again later."
-                      : "no se encontraron motoconcho disponibles en este momento! ❌\n\npor favor, inténtalo de nuevo más tarde.",
+                      : "No se encontraron conductores en este momento. Por favor, inténtalo de nuevo más tarde.",
                     data
                   );
                 } else {
@@ -810,8 +810,7 @@ app.post("/webhook", async (req, res) => {
                         : "es",
                       driver.phone,
                       newUser,
-                      newTrip,
-                      data
+                      newTrip
                     );
                     await delay(3000);
                   }
@@ -1042,23 +1041,7 @@ app.post("/webhook", async (req, res) => {
         default:
           break;
       }
-      if (data.btn_id.startsWith("confirm_")) {
-        send_button(
-          needed.language == "english"
-            ? "🟢 You have successfully confirmed the trip driver. You can message the driver to continue with the tip discussion ✅🚕"
-            : "🟢 Has confirmado exitosamente al conductor del viaje. Puedes enviar un mensaje al conductor para continuar con la discusión del viaje ✅🚕",
-          [{ id: "create_trip", title: "Start a new trip 🚕" }],
-          data
-        );
-        await delay(3000);
-        send_contact(
-          data.btn_id.replace("confirm_", ""),
-          usr.fullname,
-          data.wa_id,
-          data.wa_id,
-          data
-        );
-      } else if (data.btn_id.startsWith("ban_")) {
+      if (data.btn_id.startsWith("ban_")) {
         const phn = data.btn_id.replace("ban_", "");
         console.log(`Banning ${phn}`);
         try {
@@ -1173,16 +1156,11 @@ app.post("/webhook", async (req, res) => {
                     { ...data, to: data.btn_payload }
                   );
                   await delay(3000);
-                  send_button(
+                  send_message(
                     needed.language == "english"
                       ? "🟢 The driver has accepted your trip! \n\nPlease click on the contact below to chat with the driver. 👋🚕"
                       : "🟢 ¡El conductor ha aceptado tu viaje! \n\nPor favor, haz clic en el contacto a continuación para chatear con el conductor. 👋🚕",
-                    [
-                      {
-                        id: `confirm_${data.wa_id}`,
-                        title: "Confirm ✅",
-                      },
-                    ],
+
                     { ...data, to: data.btn_payload }
                   );
                   await delay(2000);
@@ -1199,12 +1177,9 @@ app.post("/webhook", async (req, res) => {
                     data
                   );
                   await delay(3000);
-                  send_contact(
-                    data.btn_payload,
-                    data.username,
-                    data.wa_id,
-                    data.wa_id
-                  );
+                  send_contact({ ...data, to: data.btn_payload });
+
+                  send_contact({ ...data, to: data.btn_payload });
                 } else {
                   send_message(
                     "You did not have enough ticket to accept this trip. Contact the admin to purchase ticket! ",
