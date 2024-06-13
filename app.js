@@ -1340,6 +1340,14 @@ app.post("/webhook", async (req, res) => {
                     wa_id: data.btn_payload,
                     username: usernamex,
                   });
+
+                  await delay(3000);
+                  send_message(
+                    needed.language == "english"
+                      ? "¡Ahora estás en modo de viaje! 🏁\n\n> Por favor, para interactuar con el bot, espera a que el conductor marque el viaje como completado."
+                      : "¡Ahora estás en modo de viaje! 🏁\n\n> Por favor, para interactuar con el bot, espera a que el conductor marque el viaje como completado.",
+                    { ...data, to: data.btn_payload }
+                  );
                   needed.doingSomething = true;
                   needsMap.set(data.to, needed);
                   needsMap.set(data.btn_payload, needed);
