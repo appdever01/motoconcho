@@ -174,7 +174,7 @@ app.post("/webhook", async (req, res) => {
         data.type !== "interactive" &&
         data.type !== "button"
       ) {
-        if (isAdmin) {
+        if (isAdmin && !needed.doingSomething) {
           send_button(
             needed.language == "english"
               ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
@@ -205,7 +205,7 @@ app.post("/webhook", async (req, res) => {
 
             data
           );
-        } else {
+        } else if (!isAdmin && !needed.doingSomething) {
           send_button(
             needed.language == "english"
               ? needed.isDriver
@@ -279,7 +279,7 @@ app.post("/webhook", async (req, res) => {
 
           await delay(1500);
 
-          if (isAdmin) {
+          if (isAdmin && !needed.doingSomething) {
             send_button(
               needed.language == "english"
                 ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
@@ -301,7 +301,7 @@ app.post("/webhook", async (req, res) => {
 
               data
             );
-          } else {
+          } else if (!isAdmin && !needed.doingSomething) {
             send_button(
               needed.language == "english"
                 ? `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
@@ -599,7 +599,7 @@ app.post("/webhook", async (req, res) => {
     } else if (data.msg == "/menu") {
       needed.location = false;
       needsMap.set(data.to, needed);
-      if (isAdmin) {
+      if (isAdmin && !needed.doingSomething) {
         console.log(needed.language);
         send_button(
           needed.language == "english"
@@ -631,7 +631,7 @@ app.post("/webhook", async (req, res) => {
 
           data
         );
-      } else {
+      } else if (!isAdmin && !needed.doingSomething) {
         const user = await User.findOne({ phone: data.to });
         const bannedUser = await User.findOne({ phone: data.to, banned: true });
         if (!user) {
