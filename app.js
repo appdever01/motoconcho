@@ -1342,6 +1342,8 @@ app.post("/webhook", async (req, res) => {
                     wa_id: data.btn_payload,
                     username: usernamex,
                   });
+                  needed.doingSomething = true;
+                  needsMap.set(data.to, needed);
                 } else {
                   send_message(
                     needed.language == "english"
