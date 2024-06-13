@@ -1237,7 +1237,7 @@ app.post("/webhook", async (req, res) => {
 
                   send_image(
                     needed.language == "english"
-                      ? `Driver's Information 👤 📋\n\n👤 Full Name: ${driver.name}\n📱 Phone:  ${driver.phone}\n🗣️ Language:  ${driver.language}\n🏠 Address:  ${driver.address}\n🚗 Vehicle Name:  ${driver.vehicleName}\n🪪 Plate Number:  ${driver.plateNumber}`
+                      ? `Driver's Information 👤 📋\n\n👤 Full Name: ${driver.fullname}\n📱 Phone:  ${driver.phone}\n🗣️ Language:  ${driver.language}\n🏠 Address:  ${driver.address}\n🚗 Vehicle Name:  ${driver.vehicleName}\n🪪 Plate Number:  ${driver.plateNumber}`
                       : `Información del Conductor 👤 📋\n\n👤 Nombre Completo: ${driver.name}\n📱 Teléfono:  ${driver.phone}\n🗣️ Idioma:  ${driver.language}\n🏠 Dirección:  ${driver.address}\n🚗 Nombre del Vehículo:  ${driver.vehicleName}\n🪪 Número de Placa:  ${driver.plateNumber}`,
                     driver.vehiclePic,
                     { ...data, to: data.btn_payload }
@@ -1291,7 +1291,7 @@ app.post("/webhook", async (req, res) => {
                       ],
                       data
                     );
-                  }, 1800000);
+                  }, 180000);
 
                   if (data.type == "interactive") {
                     if (data.btn_id === "yes_done") {
