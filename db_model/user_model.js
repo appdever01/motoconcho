@@ -80,6 +80,10 @@ const tripSchema = new mongoose.Schema({
   gotDriver: {
     type: Boolean,
   },
+  isFinished: {
+    type: Boolean,
+    default: false,
+  },
   driverId: {
     type: String,
   },

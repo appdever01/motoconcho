@@ -487,9 +487,9 @@ const trip_alert = (lang, to, user, trip, data) => {
     to: to,
     type: "template",
     template: {
-      name: "trip_alert",
+      name: "trip_send",
       language: {
-        code: lang ?? "en_US",
+        code: lang ?? "es",
       },
       components: [
         {
@@ -498,8 +498,8 @@ const trip_alert = (lang, to, user, trip, data) => {
             {
               type: "location",
               location: {
-                name: "Sousa Dominican | MOTOCONCHO",
-                address: `${user.fullname} Location !!`,
+                name: "motoconcho.bot",
+                address: `ubicación de ${user.fullname}...`,
                 latitude: lat,
                 longitude: long,
               },
@@ -523,17 +523,6 @@ const trip_alert = (lang, to, user, trip, data) => {
           type: "button",
           sub_type: "quick_reply",
           index: "0",
-          parameters: [
-            {
-              type: "payload",
-              payload: user.phone,
-            },
-          ],
-        },
-        {
-          type: "button",
-          sub_type: "quick_reply",
-          index: "1",
           parameters: [
             {
               type: "payload",
@@ -577,8 +566,8 @@ const send_contact = (data) => {
     contacts: [
       {
         name: {
-          formatted_name: data.usernmae,
-          first_name: data.usernmae.split(" ")[0],
+          formatted_name: data.username,
+          first_name: data.username.split(" ")[0],
         },
         phones: [
           {
