@@ -1191,6 +1191,7 @@ app.post("/webhook", async (req, res) => {
         console.log(data.btn_payload);
         needed.welcome = false;
         needsMap.set(data.to, needed);
+        needsMap.set(data.btn_payload, needed);
         const latestTrip = await Trip.findOne({ phone: data.btn_payload }).sort(
           { _id: -1 }
         );
@@ -1250,6 +1251,7 @@ app.post("/webhook", async (req, res) => {
                   );
 
                   needed.doingSomething = true;
+                  needsMap.set(data.to, needed);
                   needsMap.set(data.btn_payload, needed);
 
                   setTimeout(async () => {
@@ -1290,6 +1292,8 @@ app.post("/webhook", async (req, res) => {
                   if (data.type == "interactive") {
                     if (data.btn_id === "yes_done") {
                       needed.doingSomething = false;
+                      needsMap.set(data.to, needed);
+                      needsMap.set(data.btn_payload, needed);
 
                       Trip.findOneAndUpdate(
                         { phone: data.to },
@@ -1311,6 +1315,7 @@ app.post("/webhook", async (req, res) => {
                       );
                     } else if (data.btn_id === "no_continue") {
                       needed.doingSomething = true;
+                      needsMap.set(data.to, needed);
                       needsMap.set(data.btn_payload, needed);
                       send_message(
                         needed.language == "english"
@@ -1336,6 +1341,7 @@ app.post("/webhook", async (req, res) => {
                     username: usernamex,
                   });
                   needed.doingSomething = true;
+                  needsMap.set(data.to, needed);
                   needsMap.set(data.btn_payload, needed);
                 } else {
                   send_message(
