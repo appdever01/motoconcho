@@ -1192,9 +1192,10 @@ app.post("/webhook", async (req, res) => {
         needed.welcome = false;
         needsMap.set(data.to, needed);
         needsMap.set(data.btn_payload, needed);
-        const latestTrip = await Trip.findOne({ phone: data.btn_payload }).sort(
-          { _id: -1 }
-        );
+        const latestTrip = await Trip.findOne({
+          phone: data.btn_payload,
+          driverPhone: { $ne: data.to },
+        }).sort({ _id: -1 });
         if (latestTrip) {
           console.log(latestTrip);
           Driver.find({ phone: `${data.to}` })
@@ -1255,76 +1256,10 @@ app.post("/webhook", async (req, res) => {
                   needsMap.set(data.btn_payload, needed);
 
                   setTimeout(async () => {
-                    send_button(
-                      needed.language == "english"
-                        ? "🕒 30 minutes have passed since the trip started. Are you done with the trip?"
-                        : "🕒 Han pasado 30 minutos desde que comenzó el viaje. ¿Has terminado el viaje?",
-                      [
-                        {
-                          id: "yes_done",
-                          title: needed.language == "english" ? "Yes" : "Sí",
-                        },
-                        {
-                          id: "no_continue",
-                          title: needed.language == "english" ? "No" : "No",
-                        },
-                      ],
-                      { ...data, to: data.btn_payload }
-                    );
-                    send_button(
-                      needed.language == "english"
-                        ? "🕒 30 minutes into the trip. Is everything on track and the passenger comfortable?"
-                        : "🕒 30 minutos de viaje. ¿Está todo en orden y el pasajero cómodo?",
-                      [
-                        {
-                          id: "yes_done",
-                          title: needed.language == "english" ? "Yes" : "Sí",
-                        },
-                        {
-                          id: "no_continue",
-                          title: needed.language == "english" ? "No" : "No",
-                        },
-                      ],
-                      data
-                    );
-                  }, 180000);
-
-                  if (data.type == "interactive") {
-                    if (data.btn_id === "yes_done") {
-                      needed.doingSomething = false;
-                      needsMap.set(data.to, needed);
-                      needsMap.set(data.btn_payload, needed);
-
-                      Trip.findOneAndUpdate(
-                        { phone: data.to },
-                        { $set: { isFinished: true } },
-                        { new: true },
-                        (err, updatedTrip) => {
-                          if (err) {
-                            console.error("Error updating trip status:", err);
-                          } else {
-                            console.log(updatedTrip);
-                            send_message(
-                              needed.language == "english"
-                                ? "🏁 Trip has been marked as finished. Thank you!"
-                                : "🏁 El viaje ha sido marcado como terminado. ¡Gracias!",
-                              data
-                            );
-                          }
-                        }
-                      );
-                    } else if (data.btn_id === "no_continue") {
-                      needed.doingSomething = true;
-                      needsMap.set(data.to, needed);
-                      needsMap.set(data.btn_payload, needed);
-                      send_message(
-                        needed.language == "english"
-                          ? "🔄 Continuing the trip. Please stay safe!"
-                          : "🔄 Continuando el viaje. ¡Por favor mantente seguro!",
-                        data
-                      );
-                    }
-                  }
+                    needed.doingSomething = false;
+                    needsMap.set(data.to, needed);
+                    needsMap.set(data.btn_payload, needed);
+                  }, 300000);
 
                   await delay(3000);
                   const userx = await User.findOne({ phone: data.btn_payload });
@@ -1350,24 +1285,64 @@ app.post("/webhook", async (req, res) => {
                   );
 
                   if (data.type == "interactive") {
-                    if (data.btn_id === "yes_done") {
+                    if (data.btn_id === "finished") {
                       needed.doingSomething = false;
                       needsMap.set(data.to, needed);
                       needsMap.set(data.btn_payload, needed);
 
-                      send_message(
-                        needed.language == "english"
-                          ? "Trip have been marked as done!!"
-                          : "¡El viaje ha sido marcado como completado!",
-                        data
-                      );
-                      send_message(
-                        needed.language == "english"
-                          ? "Trip have been marked as done!!"
-                          : "¡El viaje ha sido marcado como completado!",
-                        {
-                          ...data,
-                          to: data.btn_payload,
+                      Trip.findOneAndUpdate(
+                        { phone: data.to },
+                        { $set: { isFinished: true } },
+                        { new: true },
+                        (err, updatedTrip) => {
+                          if (err) {
+                            console.error("Error updating trip status:", err);
+                          } else {
+                            console.log(updatedTrip);
+                            send_message(
+                              needed.language == "english"
+                                ? "🏁 Trip has been marked as finished. Thank you!"
+                                : "🏁 El viaje ha sido marcado como terminado. ¡Gracias!",
+                              data
+                            );
+                            send_message(
+                              needed.language == "english"
+                                ? "🏁 Trip has been marked as finished. Thank you!"
+                                : "🏁 El viaje ha sido marcado como terminado. ¡Gracias!",
+                              {
+                                ...data,
+                                to: data.btn_payload,
+                              }
+                            );
+
+                            send_button(
+                              needed.language == "english"
+                                ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
+                                : "¡Hola *Administrador de MOTOCONCHO*! 🚀🌍 ¡Ahora puedes gestionar viajes, usuarios y conductores dentro de la hermosa ciudad de Sosua, República Dominicana. 🚗🌴🌞",
+                              [
+                                {
+                                  id: "create_trip",
+                                  title:
+                                    needed.language == "english"
+                                      ? "Start a trip 🚕"
+                                      : "Comenzar un",
+                                },
+                                {
+                                  id: "trip_history",
+                                  title: "Trip History 📜",
+                                },
+                                {
+                                  id: "admin_menu",
+                                  title: "Admin menu 📋",
+                                },
+                              ],
+
+                              {
+                                ...data,
+                                to: data.btn_payload,
+                              }
+                            );
+                          }
                         }
                       );
                     }
@@ -1407,8 +1382,8 @@ app.post("/webhook", async (req, res) => {
         } else {
           send_message(
             needed.language == "english"
-              ? " The trip has already been accepted by another driver or has been cancelled. Better luck next time !!! "
-              : " El viaje ya ha sido aceptado por otro conductor o ha sido cancelado. ¡Mejor suerte la próxima vez !!! ",
+              ? "The trip may have already been accepted by another driver or has been cancelled. You might be currently in a trip. Better luck next time!!!"
+              : "El viaje puede haber sido aceptado por otro conductor o haber sido cancelado. Es posible que actualmente estés en un viaje. ¡Mejor suerte la próxima vez!",
             data
           );
         }
