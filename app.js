@@ -175,6 +175,7 @@ app.post("/webhook", async (req, res) => {
         data.type !== "button"
       ) {
         if (isAdmin) {
+          console.log(`Trackingg ${needed.doingSomething}`);
           send_button(
             needed.language == "english"
               ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
@@ -206,6 +207,7 @@ app.post("/webhook", async (req, res) => {
             data
           );
         } else if (!isAdmin) {
+          console.log(`Trackingg ${needed.doingSomething}`);
           send_button(
             needed.language == "english"
               ? needed.isDriver
@@ -281,6 +283,7 @@ app.post("/webhook", async (req, res) => {
           await delay(1500);
 
           if (isAdmin) {
+            console.log(`Trackingg ${needed.doingSomething}`);
             send_button(
               needed.language == "english"
                 ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
@@ -303,6 +306,7 @@ app.post("/webhook", async (req, res) => {
               data
             );
           } else if (!isAdmin) {
+            console.log(`Trackingg ${needed.doingSomething}`);
             send_button(
               needed.language == "english"
                 ? `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
@@ -599,6 +603,7 @@ app.post("/webhook", async (req, res) => {
       needed.location = false;
       needsMap.set(data.to, needed);
       if (isAdmin && needed.doingSomething == false) {
+        console.log(`Trackingg ${needed.doingSomething}`);
         send_button(
           needed.language == "english"
             ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
