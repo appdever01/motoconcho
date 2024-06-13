@@ -1223,8 +1223,8 @@ app.post("/webhook", async (req, res) => {
 
                   send_message(
                     needed.language == "english"
-                      ? "🟢 The driver has accepted your trip! 🚕"
-                      : "un motoconcho ha aceptado tu viaje! ✔",
+                      ? "A motoconcho has accepted your trip! ✅\n\nYou are now in trip mode...\n\n> Please wait for the driver to mark the trip as completed / wait for 30 minutes to interact with the bot."
+                      : "un motoconcho ha aceptado tu viaje! ✅\n\nahora estás en modo viaje…\n\n> por favor, para interactuar con el bot, espera a que el conductor marque el viaje como completado / espera 30 minutos.",
 
                     { ...data, to: data.btn_payload }
                   );
@@ -1275,14 +1275,6 @@ app.post("/webhook", async (req, res) => {
                     wa_id: data.btn_payload,
                     username: usernamex,
                   });
-
-                  await delay(3000);
-                  send_message(
-                    needed.language == "english"
-                      ? "You are now in travel mode! 🏁\n\n> Please, to interact with the bot, wait for the driver to mark the trip as completed."
-                      : "¡Ahora estás en modo de viaje! 🏁\n\n> Por favor, para interactuar con el bot, espera a que el conductor marque el viaje como completado.",
-                    { ...data, to: data.btn_payload }
-                  );
 
                   if (data.type == "interactive") {
                     if (data.btn_id === "finished") {
