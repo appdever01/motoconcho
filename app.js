@@ -848,7 +848,7 @@ app.post("/webhook", async (req, res) => {
                   }
                 }
               );
-            }, 240000);
+            }, 360000);
 
             Driver.find({})
               .then(async (drivers) => {
@@ -1330,7 +1330,7 @@ app.post("/webhook", async (req, res) => {
                   let usernamex = "";
                   if (userx) {
                     usernamex = userx.fullname;
-                    console.log(`User name: ${userNamex}`);
+                    console.log(`User name: ${usernamex}`);
                   } else {
                     console.error("User not found");
                   }
@@ -1338,7 +1338,7 @@ app.post("/webhook", async (req, res) => {
                   send_contact({
                     ...data,
                     wa_id: data.btn_payload,
-                    username: userNamex,
+                    username: usernamex,
                   });
                 } else {
                   send_message(
@@ -1361,13 +1361,6 @@ app.post("/webhook", async (req, res) => {
             data
           );
         }
-      } else if (data.btn_text == "decline" || data.btn_text == "rechazar") {
-        needed.welcome = false;
-        needsMap.set(data.to, needed);
-        send_message("🔴 You have successfully rejected the trip", data);
-        needed.welcome = false;
-
-        needsMap.set(data.to, needed);
       }
     }
 

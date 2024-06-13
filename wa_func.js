@@ -530,17 +530,6 @@ const trip_alert = (lang, to, user, trip, data) => {
             },
           ],
         },
-        {
-          type: "button",
-          sub_type: "quick_reply",
-          index: "1",
-          parameters: [
-            {
-              type: "payload",
-              payload: user.phone,
-            },
-          ],
-        },
       ],
     },
   });
