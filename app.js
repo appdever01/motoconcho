@@ -1344,9 +1344,49 @@ app.post("/webhook", async (req, res) => {
                   await delay(3000);
                   send_message(
                     needed.language == "english"
-                      ? "¡Ahora estás en modo de viaje! 🏁\n\n> Por favor, para interactuar con el bot, espera a que el conductor marque el viaje como completado."
+                      ? "You are now in travel mode! 🏁\n\n> Please, to interact with the bot, wait for the driver to mark the trip as completed."
                       : "¡Ahora estás en modo de viaje! 🏁\n\n> Por favor, para interactuar con el bot, espera a que el conductor marque el viaje como completado.",
                     { ...data, to: data.btn_payload }
+                  );
+
+                  if (data.type == "interactive") {
+                    if (data.btn_id === "yes_done") {
+                      needed.doingSomething = false;
+                      needsMap.set(data.to, needed);
+                      needsMap.set(data.btn_payload, needed);
+
+                      send_message(
+                        needed.language == "english"
+                          ? "Trip have been marked as done!!"
+                          : "¡El viaje ha sido marcado como completado!",
+                        data
+                      );
+                      send_message(
+                        needed.language == "english"
+                          ? "Trip have been marked as done!!"
+                          : "¡El viaje ha sido marcado como completado!",
+                        {
+                          ...data,
+                          to: data.btn_payload,
+                        }
+                      );
+                    }
+                  }
+
+                  send_button(
+                    needed.language == "english"
+                      ? "Your trip has begun! 🏁\n\n> Please, to make the customer free to do other trips, to accept other trips and mark the trip as completed press the button!"
+                      : "¡Tu viaje ha comenzado! 🏁\n\n> Por favor, para liberar al cliente para hacer otros viajes, aceptar otros viajes y marcar el viaje como completado, presiona el botón!",
+                    [
+                      {
+                        id: "finished",
+                        title:
+                          needed.language == "english"
+                            ? "finished"
+                            : "finishedí",
+                      },
+                    ],
+                    data
                   );
                   needed.doingSomething = true;
                   needsMap.set(data.to, needed);
