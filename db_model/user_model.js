@@ -44,10 +44,7 @@ const driverSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  inTrip: {
-    type: Boolean,
-    dafault: false,
-  },
+
   vehicleName: {
     type: String,
     required: true,
