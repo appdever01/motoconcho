@@ -35,7 +35,7 @@ app.use(express.json());
 const connectionString = process.env.MONGO_URI;
 mongoose
   .connect(connectionString)
-  .then(() => console.log("MongoDB connected"))
+  .then(() => console.log("MOTOCONCHO MongoDB connected"))
   .catch((error) => console.log(error.message));
 
 const getDriverCount = async () => {
@@ -169,12 +169,12 @@ app.post("/webhook", async (req, res) => {
       needsMap.set(data.to, needed);
 
       if (
-        !needed.doingSomething &&
+        needed.doingSomething == false &&
         !data.msg.startsWith("/") &&
         data.type !== "interactive" &&
         data.type !== "button"
       ) {
-        if (isAdmin && !needed.doingSomething) {
+        if (isAdmin) {
           send_button(
             needed.language == "english"
               ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
@@ -205,7 +205,7 @@ app.post("/webhook", async (req, res) => {
 
             data
           );
-        } else if (!isAdmin && !needed.doingSomething) {
+        } else if (!isAdmin) {
           send_button(
             needed.language == "english"
               ? needed.isDriver
@@ -265,6 +265,7 @@ app.post("/webhook", async (req, res) => {
       }
 
       if (
+        needed.doingSomething == false &&
         needed.name &&
         data.type !== "button" &&
         data.type !== "interactive"
@@ -279,7 +280,7 @@ app.post("/webhook", async (req, res) => {
 
           await delay(1500);
 
-          if (isAdmin && !needed.doingSomething) {
+          if (isAdmin) {
             send_button(
               needed.language == "english"
                 ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
@@ -301,7 +302,7 @@ app.post("/webhook", async (req, res) => {
 
               data
             );
-          } else if (!isAdmin && !needed.doingSomething) {
+          } else if (!isAdmin) {
             send_button(
               needed.language == "english"
                 ? `Hello *${newUser.fullname}*! 🚀🌍 \n\nWelcome back to MOTOCONCHO. Feel free to start or manage your trips and explore driver options within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞`
@@ -438,7 +439,6 @@ app.post("/webhook", async (req, res) => {
           getLanguageMessage("provideAddress", needed.language),
           data
         );
-        console.log("iffing");
       } else {
         needed.driver.phone = true;
         needed.doingSomething = true;
@@ -538,7 +538,6 @@ app.post("/webhook", async (req, res) => {
     if (needed.driver.plateNumber && data.type !== "image") {
       if (validatePlate(data) == true) {
         newDriver.plateNumber = data.msg;
-        console.log(newDriver.plateNumber);
         needed.driver.plateNumber = false;
         needsMap.set(data.to, needed);
         (newUser.fullname = newDriver.fullname),
@@ -599,8 +598,7 @@ app.post("/webhook", async (req, res) => {
     } else if (data.msg == "/menu") {
       needed.location = false;
       needsMap.set(data.to, needed);
-      if (isAdmin && !needed.doingSomething) {
-        console.log(needed.language);
+      if (isAdmin && needed.doingSomething == false) {
         send_button(
           needed.language == "english"
             ? "Hello *MOTOCONCHO* Admin! 🚀🌍 ! You can now manage trips, users and drivers within the beautiful city of Sosua, Dominican Republic. 🚗🌴🌞"
@@ -705,7 +703,6 @@ app.post("/webhook", async (req, res) => {
 
           send_message("Your language has been set to English 🇬🇧", data);
           await delay(3000);
-          console.log(data.type);
 
           if (
             needed.welcome &&
@@ -781,7 +778,7 @@ app.post("/webhook", async (req, res) => {
 
           break;
         case "create_trip":
-          console.log("Tripping");
+          console.log("Started Creating Trip......");
           send_image(
             needed.language == "english"
               ? "to connect with the drivers and make your trip easier, we need your current location… 📍\n\nfollow the steps in the image i sent you!"
@@ -897,7 +894,6 @@ app.post("/webhook", async (req, res) => {
 
         case "trip_history":
           Trip.find({ phone: `${data.to}` }).then(async (trips) => {
-            console.log(trips.length);
             if (trips.length > 0) {
               for (let index = 0; index < trips.length; index++) {
                 const trip = trips[index];
@@ -1006,7 +1002,6 @@ app.post("/webhook", async (req, res) => {
                 );
               } else {
                 for (const driver of drivers) {
-                  console.log(`Driver phoner :::: ${driver.phone}`);
                   Trip.findOne({ driverPhone: `${driver.phone}` })
                     .count()
                     .then((count) => {
@@ -1117,7 +1112,6 @@ app.post("/webhook", async (req, res) => {
             { $set: { banned: true } },
             { new: true, upsert: true }
           );
-          console.log("Updated document:", updatedDocument);
           send_message(
             ` *${updatedDocument.fullname}* has been successfully banned from the platform. 🛑`,
             data
@@ -1127,14 +1121,12 @@ app.post("/webhook", async (req, res) => {
         }
       } else if (data.btn_id.startsWith("unban_")) {
         const phn = data.btn_id.replace("unban_", "");
-        console.log(`Unbanning ${phn}`);
         try {
           const updatedDocument = await User.findOneAndUpdate(
             { phone: phn },
             { $set: { banned: false } },
             { new: true, upsert: true }
           );
-          console.log("Updated document:", updatedDocument);
           send_message(
             ` *${updatedDocument.fullname}* has been successfully unbanned from the platform. ✅☺️`,
             data
@@ -1191,7 +1183,6 @@ app.post("/webhook", async (req, res) => {
           break;
       }
       if (data.btn_text == "accept" || data.btn_text == "aceptar") {
-        console.log("trippinggg");
         console.log(data.btn_payload);
         needed.welcome = false;
         needsMap.set(data.to, needed);
@@ -1203,7 +1194,6 @@ app.post("/webhook", async (req, res) => {
           Driver.find({ phone: `${data.to}` })
             .then(async (drivers) => {
               for (const driver of drivers) {
-                console.log(driver);
                 let rticket = driver.ticket;
                 console.log(rticket);
                 if (parseInt(rticket) > 0) {
@@ -1212,7 +1202,6 @@ app.post("/webhook", async (req, res) => {
                     { $set: { ticket: rticket - 1 } },
                     { new: true, upsert: true }
                   );
-                  console.log(`BTNNNNN PAYLOAD::: ${data.btn_payload}`);
                   await Trip.findOneAndUpdate(
                     { phone: data.btn_payload },
                     {
@@ -1224,7 +1213,6 @@ app.post("/webhook", async (req, res) => {
                     },
                     { new: true, upsert: true }
                   );
-                  console.log(needed.language);
 
                   send_message(
                     needed.language == "english"
@@ -1332,7 +1320,6 @@ app.post("/webhook", async (req, res) => {
                   let usernamex = "";
                   if (userx) {
                     usernamex = userx.fullname;
-                    console.log(`User name: ${usernamex}`);
                   } else {
                     console.error("User not found");
                   }
